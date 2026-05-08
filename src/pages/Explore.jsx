@@ -71,24 +71,6 @@ const Explore = () => {
         return allFree ? 'Gratuit' : `À partir de ${min} ${currency}`;
     };
 
-    const getEventStartAt = (event) => event?.startAt || event?.date;
-    const getEventEndAt = (event) => event?.endAt || event?.date;
-
-    const formatEventDateRange = (event) => {
-        const start = getEventStartAt(event);
-        const end = getEventEndAt(event);
-        if (!start) return '';
-
-        const startDate = new Date(start);
-        const endDate = end ? new Date(end) : null;
-
-        if (endDate && startDate.toDateString() !== endDate.toDateString()) {
-            return `${startDate.toLocaleDateString()} → ${endDate.toLocaleDateString()}`;
-        }
-
-        return startDate.toLocaleDateString();
-    };
-
     const handleHype = async (e, eventId) => {
         e.stopPropagation(); // prevent navigating to event detail
         try {
@@ -217,7 +199,7 @@ const Explore = () => {
 
                                         <div className="absolute left-4 top-4 flex flex-wrap items-center gap-2">
                                             <span className="rounded-full border border-white/20 bg-slate-950/65 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-white backdrop-blur-md">
-                                                {formatEventDateRange(event)}
+                                                {new Date(event.date).toLocaleDateString()}
                                             </span>
                                             <span className="rounded-full border border-red-400/20 bg-red-500/90 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-white shadow-lg shadow-red-500/25">
                                                 {getMinPrice(event.tickets, event.currency)}
@@ -255,16 +237,11 @@ const Explore = () => {
                                             <div className="space-y-1.5">
                                                 <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Date & heure</p>
                                                 <p className="text-sm font-bold text-slate-900">
-                                                    {formatEventDateRange(event)}
+                                                    {new Date(event.date).toLocaleDateString([], { day: '2-digit', month: 'short', year: 'numeric' })}
                                                 </p>
                                                 <p className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
                                                     <Calendar size={13} className="text-red-500" />
-                                                    {(() => {
-                                                        const startAt = getEventStartAt(event);
-                                                        return startAt
-                                                            ? new Date(startAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                                                            : '';
-                                                    })()}
+                                                    {new Date(event.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                 </p>
                                             </div>
 

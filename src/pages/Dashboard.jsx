@@ -5,8 +5,6 @@ import {
     Users, 
     QrCode, 
     Zap,
-    Filter,
-    ChevronDown,
     Loader2
 } from 'lucide-react';
 
@@ -17,41 +15,6 @@ const Dashboard = () => {
     const navigate = useNavigate();
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [rangePreset, setRangePreset] = useState('30d'); // 7d | 30d | 90d | ytd | 12m | all | custom
-    const [customFrom, setCustomFrom] = useState('');
-    const [customTo, setCustomTo] = useState('');
-    const [groupBy, setGroupBy] = useState('day'); // day | month
-
-    const buildRangeParams = () => {
-        const now = new Date();
-        const startOfYear = new Date(now.getFullYear(), 0, 1);
-
-        const toISO = (d) => d.toISOString();
-
-        if (rangePreset === 'custom') {
-            const from = customFrom ? new Date(customFrom) : null;
-            const to = customTo ? new Date(customTo) : null;
-            return {
-                from: from && !Number.isNaN(from.getTime()) ? toISO(from) : null,
-                to: to && !Number.isNaN(to.getTime()) ? toISO(to) : null
-            };
-        }
-
-        if (rangePreset === 'all') return { from: null, to: null };
-
-        if (rangePreset === 'ytd') return { from: toISO(startOfYear), to: toISO(now) };
-
-        if (rangePreset === '12m') {
-            const from = new Date(now);
-            from.setMonth(from.getMonth() - 12);
-            return { from: toISO(from), to: toISO(now) };
-        }
-
-        const days = rangePreset === '7d' ? 7 : rangePreset === '90d' ? 90 : 30;
-        const from = new Date(now);
-        from.setDate(from.getDate() - days);
-        return { from: toISO(from), to: toISO(now) };
-    };
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -61,13 +24,7 @@ const Dashboard = () => {
                     navigate('/auth');
                     return;
                 }
-                const { from, to } = buildRangeParams();
-                const params = new URLSearchParams();
-                if (from) params.set('from', from);
-                if (to) params.set('to', to);
-                params.set('groupBy', groupBy);
-
-                const response = await fetch(`http://localhost:5000/api/events/stats?${params.toString()}`, {
+                const response = await fetch('http://localhost:5000/api/events/stats', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const data = await response.json();
@@ -81,12 +38,11 @@ const Dashboard = () => {
             }
         };
         fetchStats();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [navigate, rangePreset, customFrom, customTo, groupBy]);
+    }, [navigate]);
 
     if (loading) {
         return (
-            <div className="w-full h-screen flex justify-center items-center bg-linear-to-br from-white via-slate-50 to-slate-100/60">
+            <div className="w-full h-screen flex justify-center items-center bg-gradient-to-br from-white via-slate-50 to-slate-100/60">
                 <Loader2 className="animate-spin text-slate-700" size={50} />
             </div>
         );
@@ -98,9 +54,9 @@ const Dashboard = () => {
 
     const statCards = [
         { label: 'Total Événements', value: stats.totalEvents, change: 'Créés', icon: Calendar, color: 'text-slate-700', bg: 'bg-slate-500/10' },
-        { label: 'Revenus', value: `${stats.totalRevenue}`, change: 'Générés', icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-500/10' },
+        { label: 'Revenus', value: `${stats.totalRevenue} €`, change: 'Générés', icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-500/10' },
         { label: 'Billets Vendus', value: stats.ticketsSold, change: 'Ventes', icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-500/10' },
-        { label: 'Scans (entrée)', value: stats.scansIn, change: 'Sur période', icon: Zap, color: 'text-amber-600', bg: 'bg-amber-500/10' }
+        { label: 'Participants Actifs', value: stats.scansIn, change: 'Scannés', icon: Zap, color: 'text-amber-600', bg: 'bg-amber-500/10' }
     ];
 
     const CustomTooltip = ({ active, payload, label }) => {
@@ -117,7 +73,7 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="min-h-screen bg-linear-to-br from-white via-slate-50 to-slate-100/60">
+        <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-slate-100/60">
             <div className="max-w-7xl mx-auto px-6 sm:px-8 py-10 sm:py-12">
             {/* Welcome Section */}
             <div className="mb-10">
@@ -126,100 +82,6 @@ const Dashboard = () => {
                 </div>
                 <h1 className="text-3xl sm:text-4xl font-black tracking-tight mb-2 text-slate-900">Centre de commandement</h1>
                 <p className="text-slate-500 font-medium">Bon retour. Vos événements avancent avec une vue claire et premium.</p>
-            </div>
-
-            {/* Range filters */}
-            <div className="mb-8 grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-4">
-                <div className="bg-white border border-slate-200/70 rounded-[24px] p-4 sm:p-5 shadow-[0_10px_30px_-20px_rgba(15,23,42,0.12)]">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                        <div className="flex items-center gap-2">
-                            <div className="p-2 rounded-2xl bg-slate-100 text-slate-700 border border-slate-200">
-                                <Filter size={16} />
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Période</p>
-                                <p className="text-sm font-bold text-slate-900">Filtrer vos chiffres</p>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 sm:flex gap-2">
-                            {[
-                                { id: '7d', label: '7 jours' },
-                                { id: '30d', label: '30 jours' },
-                                { id: '90d', label: '90 jours' },
-                                { id: 'ytd', label: 'YTD' },
-                                { id: '12m', label: '12 mois' },
-                                { id: 'all', label: 'Tout' },
-                                { id: 'custom', label: 'Personnalisé' }
-                            ].map((p) => (
-                                <button
-                                    key={p.id}
-                                    type="button"
-                                    onClick={() => setRangePreset(p.id)}
-                                    className={`rounded-2xl px-3 py-2 text-[10px] font-black uppercase tracking-widest border transition-all ${
-                                        rangePreset === p.id
-                                            ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
-                                            : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-                                    }`}
-                                >
-                                    {p.label}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {rangePreset === 'custom' && (
-                        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-0.5">Du</label>
-                                <input
-                                    type="datetime-local"
-                                    value={customFrom}
-                                    onChange={(e) => setCustomFrom(e.target.value)}
-                                    className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:border-slate-300"
-                                />
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-0.5">Au</label>
-                                <input
-                                    type="datetime-local"
-                                    value={customTo}
-                                    onChange={(e) => setCustomTo(e.target.value)}
-                                    className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:border-slate-300"
-                                />
-                            </div>
-                            <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-0.5">Agrégation</label>
-                                <div className="mt-2 relative">
-                                    <select
-                                        value={groupBy}
-                                        onChange={(e) => setGroupBy(e.target.value)}
-                                        className="w-full appearance-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 pr-10 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:border-slate-300"
-                                    >
-                                        <option value="day">Jour</option>
-                                        <option value="month">Mois</option>
-                                    </select>
-                                    <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                <div className="bg-white border border-slate-200/70 rounded-[24px] p-4 sm:p-5 shadow-[0_10px_30px_-20px_rgba(15,23,42,0.12)] flex flex-col justify-between">
-                    <div>
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Astuce</p>
-                        <p className="mt-2 text-sm font-bold text-slate-900">Scans = entrée (log), pas juste statut.</p>
-                        <p className="mt-1 text-xs text-slate-500 font-medium leading-relaxed">Pour un event sur 3 jours, ton ticket reste valable jusqu’à `endAt`.</p>
-                    </div>
-                    <button
-                        type="button"
-                        onClick={() => navigate('/dashboard/analytics')}
-                        className="mt-4 rounded-2xl bg-slate-900 text-white px-4 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition-all"
-                    >
-                        Voir l’analytics →
-                    </button>
-                </div>
             </div>
 
             {/* Stats Grid */}

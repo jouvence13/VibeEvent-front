@@ -29,24 +29,6 @@ const TicketWallet = () => {
         fetchTickets();
     }, []);
 
-    const getEventStartAt = (event) => event?.startAt || event?.date;
-    const getEventEndAt = (event) => event?.endAt || event?.date;
-
-    const formatEventDateRange = (event) => {
-        const start = getEventStartAt(event);
-        const end = getEventEndAt(event);
-        if (!start) return '';
-
-        const startDate = new Date(start);
-        const endDate = end ? new Date(end) : null;
-
-        if (endDate && startDate.toDateString() !== endDate.toDateString()) {
-            return `${startDate.toLocaleDateString()} → ${endDate.toLocaleDateString()}`;
-        }
-
-        return startDate.toLocaleDateString();
-    };
-
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 1024);
         checkMobile();
@@ -132,10 +114,7 @@ const TicketWallet = () => {
                                         </span>
                                     </div>
                                     <div className="text-slate-500 text-sm mt-1 flex items-center gap-4 flex-wrap">
-                                        <span className="flex items-center gap-1">
-                                            <Clock size={14} />
-                                            {formatEventDateRange(ticket.event)}
-                                        </span>
+                                        <span className="flex items-center gap-1"><Clock size={14}/> {new Date(ticket.event?.date).toLocaleDateString()}</span>
                                     </div>
                                     <div className="mt-3 inline-block">
                                         <span className={cn(

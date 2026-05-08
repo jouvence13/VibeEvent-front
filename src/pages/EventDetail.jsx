@@ -506,11 +506,11 @@ const EventDetail = () => {
                         <div className="mt-3 space-y-1.5">
                             <div className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
                                 <span className="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400">Date</span>
-                                <span className="text-xs font-bold text-slate-900 text-right">{formatDateRange(event)}</span>
+                                <span className="text-xs font-bold text-slate-900 text-right">{new Date(event.date).toLocaleDateString([], { weekday: 'short', day: '2-digit', month: 'long' })}</span>
                             </div>
                             <div className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
                                 <span className="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400">Horaire</span>
-                                <span className="text-xs font-bold text-slate-900 text-right">{formatTimeRange(event)}</span>
+                                <span className="text-xs font-bold text-slate-900 text-right">{new Date(event.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                             </div>
                             <div className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
                                 <span className="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400">Lieu</span>

@@ -17,8 +17,7 @@ const CreateEvent = () => {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
-        startAt: '',
-        endAt: '',
+        date: '',
         location: '',
         googleMapsLink: '',
         category: 'Nightlife',
@@ -40,11 +39,9 @@ const CreateEvent = () => {
                     const response = await fetch(`http://localhost:5000/api/events/${id}`);
                     const data = await response.json();
                     if (response.ok) {
-                        // Convert dates to datetime-local format (support legacy "date")
-                        const startDateObj = new Date(data.startAt || data.date);
-                        const endDateObj = new Date(data.endAt || data.date);
-                        const localStart = startDateObj.toISOString().slice(0, 16);
-                        const localEnd = endDateObj.toISOString().slice(0, 16);
+                        // Convert date to datetime-local format
+                        const dateObj = new Date(data.date);
+                        const localDateTime = dateObj.toISOString().slice(0, 16);
 
                         // Reconstruct ticket state
                         const ticketsState = {
@@ -66,8 +63,7 @@ const CreateEvent = () => {
                         setFormData({
                             title: data.title,
                             description: data.description,
-                            startAt: localStart,
-                            endAt: localEnd,
+                            date: localDateTime,
                             location: data.location,
                             googleMapsLink: data.googleMapsLink || '',
                             category: data.category,
@@ -273,32 +269,16 @@ const CreateEvent = () => {
                     <section>
                         <h2 className="text-xs font-black text-slate-600 uppercase tracking-[0.2em] mb-4">Informations pratiques</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                            {/* Start */}
+                            {/* Date */}
                             <div className="rounded-[28px] border border-slate-200/80 bg-white shadow-[0_8px_32px_-8px_rgba(15,23,42,0.1)] p-5 sm:p-6">
                                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-0.5 mb-3 block flex items-center gap-2">
-                                    <Calendar size={12} className="text-red-500" /> Début
+                                    <Calendar size={12} className="text-red-500" /> Date & Heure
                                 </label>
                                 <input 
-                                    name="startAt"
+                                    name="date"
                                     type="datetime-local" 
                                     required
-                                    value={formData.startAt}
-                                    onChange={handleChange}
-                                    className="w-full bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200/60 rounded-2xl py-3 sm:py-3.5 px-4 sm:px-5 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500 transition-all"
-                                />
-                            </div>
-
-                            {/* End */}
-                            <div className="rounded-[28px] border border-slate-200/80 bg-white shadow-[0_8px_32px_-8px_rgba(15,23,42,0.1)] p-5 sm:p-6">
-                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-0.5 mb-3 block flex items-center gap-2">
-                                    <Calendar size={12} className="text-red-500" /> Fin
-                                </label>
-                                <input 
-                                    name="endAt"
-                                    type="datetime-local" 
-                                    required
-                                    min={formData.startAt || undefined}
-                                    value={formData.endAt}
+                                    value={formData.date}
                                     onChange={handleChange}
                                     className="w-full bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200/60 rounded-2xl py-3 sm:py-3.5 px-4 sm:px-5 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500 transition-all"
                                 />
