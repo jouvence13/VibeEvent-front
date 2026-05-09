@@ -1,59 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import { 
-    Search, 
-    Bell, 
-    Filter, 
-    MapPin, 
-    Calendar, 
     Heart, 
     ChevronRight, 
-    Star,
-    Music,
-    Mic2,
-    Palette,
-    Dumbbell,
-    PartyPopper,
     Loader2,
-    Settings
+    Filter,
+    PartyPopper,
+    Music,
+    Star,
+    Palette,
+    Mic2,
+    Dumbbell,
+    Calendar,
+    MapPin,
+    LogIn
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const categoryMap = {
-    'Tous': null,
-    'Concerts': 'concerts',
-    'Nightlife': 'nightlife',
-    'Workshops': 'workshops',
-    'Expositions': 'expositions',
-    'Sports': 'sports',
-};
-
 const categories = [
-    { name: 'Tous', icon: PartyPopper },
-    { name: 'Concerts', icon: Music },
-    { name: 'Nightlife', icon: Star },
-    { name: 'Workshops', icon: Palette },
-    { name: 'Expositions', icon: Mic2 },
-    { name: 'Sports', icon: Dumbbell },
+    { name: 'Tous', icon: PartyPopper, active: true },
+    { name: 'Concerts', icon: Music, active: false },
+    { name: 'Nightlife', icon: Star, active: false },
+    { name: 'Workshops', icon: Palette, active: false },
+    { name: 'Expositions', icon: Mic2, active: false },
+    { name: 'Sports', icon: Dumbbell, active: false },
 ];
 
-const Explore = () => {
+const HomePage = () => {
     const navigate = useNavigate();
-    const [allEvents, setAllEvents] = useState([]);
-    const [filteredEvents, setFilteredEvents] = useState([]);
+    const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [newsletterEmail, setNewsletterEmail] = useState('');
     const [subscribed, setSubscribed] = useState(false);
-    const [selectedCategory, setSelectedCategory] = useState('Tous');
 
-    // Fetch all events
     useEffect(() => {
         const fetchEvents = async () => {
             try {
                 const response = await fetch('http://localhost:5000/api/events');
                 const data = await response.json();
                 if (response.ok) {
-                    setAllEvents(data);
-                    setFilteredEvents(data); // Initially show all
+                    // Limiter à 6 événements pour la homepage
+                    setEvents(data.slice(0, 6));
                 }
             } catch (err) {
                 console.error(err);
@@ -64,20 +50,9 @@ const Explore = () => {
         fetchEvents();
     }, []);
 
-    // Filter events by category
-    useEffect(() => {
-        if (selectedCategory === 'Tous') {
-            setFilteredEvents(allEvents);
-        } else {
-            const categoryKey = categoryMap[selectedCategory];
-            setFilteredEvents(allEvents.filter(event => {
-                const eventCategory = event.category?.toLowerCase() || '';
-                return eventCategory === categoryKey;
-            }));
-        }
-    }, [selectedCategory, allEvents]);
-
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const token = localStorage.getItem('token');
+    const isAuthenticated = !!token && Object.keys(currentUser).length > 0;
 
     const handleSubscribe = (e) => {
         e.preventDefault();
@@ -88,7 +63,6 @@ const Explore = () => {
         setTimeout(() => setSubscribed(false), 5000);
     };
 
-    // Helper to extract min price
     const getMinPrice = (tickets, currency = 'EUR') => {
         if (!tickets || tickets.length === 0) return 'Gratuit';
         const prices = tickets.map(t => t.price);
@@ -98,20 +72,19 @@ const Explore = () => {
     };
 
     const handleHype = async (e, eventId) => {
-        e.stopPropagation(); // prevent navigating to event detail
+        e.stopPropagation();
+        if (!isAuthenticated) {
+            navigate('/auth');
+            return;
+        }
         try {
-            const token = localStorage.getItem('token');
-            if(!token) {
-                navigate('/auth');
-                return;
-            }
             const response = await fetch(`http://localhost:5000/api/events/${eventId}/hype`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (response.ok) {
                 const { hyped } = await response.json();
-                setAllEvents(prev => prev.map(ev => {
+                setEvents(prev => prev.map(ev => {
                     if (ev._id === eventId) {
                         let newHypeUsers = [...(ev.hypeUsers || [])];
                         if (hyped) {
@@ -168,33 +141,32 @@ const Explore = () => {
                     </div>
                 </div>
 
-                {/* Categories */}
+                {/* Featured Events Section */}
                 <div className="px-8 lg:px-12 mb-12">
                     <div className="flex items-center justify-between mb-8">
-                        <h2 className="text-2xl font-black tracking-tight underline decoration-red-500 underline-offset-8">Explorer par catégories</h2>
-                        <button className="p-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-500 hover:text-slate-900 transition-colors shadow-sm">
-                            <Filter size={20} />
-                        </button>
+                        <h2 className="text-2xl font-black tracking-tight underline decoration-red-500 underline-offset-8">
+                            {isAuthenticated ? 'Événements en vedette' : 'Découvrez les événements'}
+                        </h2>
                     </div>
-                    <div className="relative overflow-hidden rounded-[28px] border border-slate-200/80 bg-gradient-to-r from-white via-slate-50 to-white p-3 shadow-[0_18px_60px_-40px_rgba(15,23,42,0.45)]">
-                        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(239,68,68,0.10),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(15,23,42,0.04),transparent_38%)]" />
-                        <div className="relative flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
-                        {categories.map((cat, i) => (
-                            <button 
-                                key={i}
-                                onClick={() => setSelectedCategory(cat.name)}
-                                className={`group flex items-center gap-3 px-5 lg:px-6 py-2.5 lg:py-3 rounded-full border whitespace-nowrap transition-all duration-300 shrink-0 ${
-                                    selectedCategory === cat.name
-                                    ? "bg-gradient-to-r from-red-600 to-red-500 border-red-400 text-white shadow-[0_14px_30px_-16px_rgba(239,68,68,0.9)] ring-1 ring-red-500/20" 
-                                    : "bg-white/80 border-slate-200 text-slate-500 hover:border-red-200 hover:text-slate-900 hover:bg-white hover:shadow-[0_10px_24px_-18px_rgba(15,23,42,0.55)]"
-                                }`}
-                            >
-                                <cat.icon size={17} className={selectedCategory === cat.name ? "drop-shadow-sm" : "group-hover:text-red-500 transition-colors"} />
-                                <span className="text-sm font-black tracking-tight">{cat.name}</span>
-                            </button>
-                        ))}
+
+                    {/* Authentication prompt if not logged in */}
+                    {!isAuthenticated && (
+                        <div className="mb-8 p-6 lg:p-8 rounded-[28px] bg-gradient-to-r from-slate-50 to-white border border-slate-200/80">
+                            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                                <div className="text-center md:text-left">
+                                    <h3 className="text-xl lg:text-2xl font-black tracking-tight mb-2">Connectez-vous pour accéder aux tickets</h3>
+                                    <p className="text-slate-600 font-medium">Inscription ou connexion en quelques secondes pour acheter vos tickets et gérer vos événements.</p>
+                                </div>
+                                <button 
+                                    onClick={() => navigate('/auth')}
+                                    className="group flex items-center gap-3 bg-red-600 hover:bg-red-500 text-white font-black py-3 lg:py-4 px-6 lg:px-8 rounded-2xl text-xs lg:text-sm uppercase tracking-[0.18em] shadow-lg shadow-red-500/20 transition-all whitespace-nowrap shrink-0"
+                                >
+                                    <LogIn size={18} />
+                                    Se connecter
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
 
                 {/* Events Grid */}
@@ -202,17 +174,17 @@ const Explore = () => {
                     <div className="flex justify-center items-center py-20">
                         <Loader2 className="animate-spin text-red-500" size={40} />
                     </div>
-                ) : filteredEvents.length === 0 ? (
+                ) : events.length === 0 ? (
                     <div className="px-8 lg:px-12 text-center py-20 text-slate-500 font-bold tracking-widest uppercase text-xs">
-                        Aucun événement trouvé dans cette catégorie.
+                        Aucun événement publié pour le moment.
                     </div>
                 ) : (
                     <div className="px-4 sm:px-6 lg:px-10 xl:px-12 2xl:px-16 w-full">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 sm:gap-7 lg:gap-8 w-full">
-                            {filteredEvents.map((event) => (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-7 lg:gap-8 w-full">
+                            {events.map((event) => (
                                 <div 
                                     key={event._id} 
-                                    onClick={() => navigate(`/event/${event._id}`)}
+                                    onClick={() => isAuthenticated ? navigate(`/event/${event._id}`) : navigate('/auth')}
                                     className="group relative w-full overflow-hidden rounded-[32px] border border-slate-200/80 bg-white shadow-[0_24px_80px_-40px_rgba(15,23,42,0.45)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_32px_100px_-45px_rgba(15,23,42,0.6)] cursor-pointer"
                                 >
                                     <div className="relative h-56 overflow-hidden">
@@ -233,16 +205,18 @@ const Explore = () => {
                                             </span>
                                         </div>
 
-                                        <button 
-                                            onClick={(e) => handleHype(e, event._id)}
-                                            className="absolute right-4 top-4 flex items-center gap-1.5 rounded-full border border-white/15 bg-white/15 px-3 py-2 text-white backdrop-blur-md opacity-100 transition-all hover:bg-white/25 sm:opacity-0 sm:translate-y-1 sm:group-hover:opacity-100 sm:group-hover:translate-y-0"
-                                        >
-                                            <Heart 
-                                                size={15} 
-                                                className={(event.hypeUsers || []).includes(currentUser.id || currentUser._id) ? "fill-red-500 text-red-500" : ""}
-                                            />
-                                            {event.hypeUsers?.length > 0 && <span className="text-[10px] font-black">{event.hypeUsers.length}</span>}
-                                        </button>
+                                        {isAuthenticated && (
+                                            <button 
+                                                onClick={(e) => handleHype(e, event._id)}
+                                                className="absolute right-4 top-4 flex items-center gap-1.5 rounded-full border border-white/15 bg-white/15 px-3 py-2 text-white backdrop-blur-md opacity-100 transition-all hover:bg-white/25 sm:opacity-0 sm:translate-y-1 sm:group-hover:opacity-100 sm:group-hover:translate-y-0"
+                                            >
+                                                <Heart 
+                                                    size={15} 
+                                                    className={(event.hypeUsers || []).includes(currentUser.id || currentUser._id) ? "fill-red-500 text-red-500" : ""}
+                                                />
+                                                {event.hypeUsers?.length > 0 && <span className="text-[10px] font-black">{event.hypeUsers.length}</span>}
+                                            </button>
+                                        )}
 
                                         <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-3 text-white">
                                             <div className="min-w-0">
@@ -290,16 +264,20 @@ const Explore = () => {
                                                 <p className="truncate text-sm font-bold text-slate-900">{event.organization?.name || 'Evenflow'}</p>
                                             </div>
 
-                                            <div className="flex items-center gap-2 rounded-full bg-red-500/10 px-3 py-2 text-red-600">
-                                                <Heart size={14} className={(event.hypeUsers || []).includes(currentUser.id || currentUser._id) ? "fill-red-500 text-red-500" : ""} />
-                                                <span className="text-xs font-black uppercase tracking-[0.16em]">
-                                                    {(event.hypeUsers || []).length || 0} hype
-                                                </span>
-                                            </div>
+                                            {isAuthenticated && (
+                                                <div className="flex items-center gap-2 rounded-full bg-red-500/10 px-3 py-2 text-red-600">
+                                                    <Heart size={14} className={(event.hypeUsers || []).includes(currentUser.id || currentUser._id) ? "fill-red-500 text-red-500" : ""} />
+                                                    <span className="text-xs font-black uppercase tracking-[0.16em]">
+                                                        {(event.hypeUsers || []).length || 0} hype
+                                                    </span>
+                                                </div>
+                                            )}
                                         </div>
 
                                         <button className="mt-4 inline-flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-slate-900 px-4 py-3 text-left text-white transition-all hover:bg-slate-800">
-                                            <span className="text-xs font-black uppercase tracking-[0.2em]">Voir les détails</span>
+                                            <span className="text-xs font-black uppercase tracking-[0.2em]">
+                                                {isAuthenticated ? 'Voir les détails' : 'Se connecter'}
+                                            </span>
                                             <ChevronRight size={16} />
                                         </button>
                                     </div>
@@ -309,34 +287,52 @@ const Explore = () => {
                     </div>
                 )}
 
+                {/* CTA to Dashboard */}
+                {events.length > 0 && (
+                    <div className="px-8 lg:px-12 mt-12">
+                        <div className="p-8 lg:p-12 rounded-[40px] bg-gradient-to-r from-red-600 to-red-500 text-white text-center">
+                            <h3 className="text-2xl lg:text-3xl font-black tracking-tight mb-3">Voir tous les événements</h3>
+                            <p className="text-white/90 font-medium mb-6 max-w-2xl mx-auto">
+                                {isAuthenticated ? 'Explorez notre catalogue complet et découvrez des événements filtrés par catégories.' : 'Connectez-vous pour accéder à notre catalogue complet d\'événements.'}
+                            </p>
+                            <button 
+                                onClick={() => navigate('/dashboard/explore')}
+                                className="inline-flex items-center gap-2 bg-white text-red-600 font-black py-3 px-8 rounded-2xl text-sm uppercase tracking-[0.18em] hover:bg-white/90 transition-all"
+                            >
+                                Explorer plus
+                                <ChevronRight size={18} />
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 {/* Newsletter / Call to action */}
-                <div className="px-8 lg:px-12 mt-5">
+                <div className="px-8 lg:px-12 mt-12">
                     <div className="bg-white border border-slate-200 rounded-[64px] p-8 sm:p-12 lg:p-20 flex flex-col items-start gap-6 relative overflow-hidden">
-                            <div className="relative z-10 max-w-3xl text-center md:text-left">
-                                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tighter mb-2 leading-tight">Ne manquez pas la prochaine étape.</h2>
-                                <p className="text-slate-500 text-sm md:text-base font-medium leading-relaxed">Inscrivez-vous pour recevoir des recommandations hebdomadaires.</p>
-                            </div>
-                            <form onSubmit={handleSubscribe} className="relative z-10 flex flex-col sm:flex-row w-full md:w-auto gap-3 mt-1">
-                                <input 
-                                    type="email" 
-                                    aria-label="Email pour recommandations"
-                                    required
-                                    value={newsletterEmail}
-                                    onChange={(e) => setNewsletterEmail(e.target.value)}
-                                    placeholder="Votre email" 
-                                    className="bg-slate-100 border border-slate-200 rounded-2xl py-3 px-4 md:py-4 md:px-6 outline-none focus:border-red-500/30 w-full md:w-80 font-medium"
-                                />
-                                <button type="submit" className="bg-red-600 hover:bg-red-500 text-white font-black py-3 px-6 md:py-4 md:px-10 rounded-2xl text-xs uppercase tracking-[0.2em] transition-all w-full sm:w-auto shadow-xl shadow-red-500/20">
-                                    S'abonner
-                                </button>
-                            </form>
-                            {subscribed && <div className="text-sm text-emerald-600 font-bold mt-1">Merci — vous êtes inscrit(e) !</div>}
+                        <div className="relative z-10 max-w-3xl text-center md:text-left">
+                            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tighter mb-2 leading-tight">Ne manquez pas la prochaine étape.</h2>
+                            <p className="text-slate-500 text-sm md:text-base font-medium leading-relaxed">Inscrivez-vous pour recevoir des recommandations hebdomadaires.</p>
+                        </div>
+                        <form onSubmit={handleSubscribe} className="relative z-10 flex flex-col sm:flex-row w-full md:w-auto gap-3 mt-1">
+                            <input 
+                                type="email" 
+                                aria-label="Email pour recommandations"
+                                required
+                                value={newsletterEmail}
+                                onChange={(e) => setNewsletterEmail(e.target.value)}
+                                placeholder="Votre email" 
+                                className="bg-slate-100 border border-slate-200 rounded-2xl py-3 px-4 md:py-4 md:px-6 outline-none focus:border-red-500/30 w-full md:w-80 font-medium"
+                            />
+                            <button type="submit" className="bg-red-600 hover:bg-red-500 text-white font-black py-3 px-6 md:py-4 md:px-10 rounded-2xl text-xs uppercase tracking-[0.2em] transition-all w-full sm:w-auto shadow-xl shadow-red-500/20">
+                                S'abonner
+                            </button>
+                        </form>
+                        {subscribed && <div className="text-sm text-emerald-600 font-bold mt-1">Merci — vous êtes inscrit(e) !</div>}
                     </div>
                 </div>
             </main>
-
         </div>
     );
 };
 
-export default Explore;
+export default HomePage;

@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
 import Voting from './pages/Voting';
+import HomePage from './pages/HomePage';
 import Explore from './pages/Explore';
 import EventDetail from './pages/EventDetail';
 import MainLayout from './layouts/MainLayout';
@@ -27,6 +28,9 @@ function App() {
       <Routes>
         <Route path="/auth" element={<Auth />} />
         
+        {/* Public routes */}
+        <Route path="/" element={<HomePage />} />
+        
         {/* Unified Layout */}
         <Route element={<MainLayout />}>
           {/* Attendee content */}
@@ -40,6 +44,7 @@ function App() {
   
           {/* Organizer content */}
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard/explore" element={<Explore />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/dashboard/events/create" element={<CreateEvent />} />
@@ -52,8 +57,6 @@ function App() {
           <Route path="/dashboard/voting" element={<PollManager />} />
           <Route path="/dashboard/settings" element={<Profile />} />
         </Route>
-  
-        <Route path="/" element={<Navigate to="/auth" replace />} />
       </Routes>
     </ToastProvider>
   );
