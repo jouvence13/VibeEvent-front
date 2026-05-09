@@ -20,11 +20,11 @@ import { useNavigate } from 'react-router-dom';
 
 const categoryMap = {
     'Tous': null,
-    'Concerts': 'concerts',
-    'Nightlife': 'nightlife',
-    'Workshops': 'workshops',
-    'Expositions': 'expositions',
-    'Sports': 'sports',
+    'Concerts': 'Concerts',
+    'Nightlife': 'Nightlife',
+    'Workshops': 'Workshops',
+    'Expositions': 'Expositions',
+    'Sports': 'Sports',
 };
 
 const categories = [
@@ -71,8 +71,7 @@ const Explore = () => {
         } else {
             const categoryKey = categoryMap[selectedCategory];
             setFilteredEvents(allEvents.filter(event => {
-                const eventCategory = event.category?.toLowerCase() || '';
-                return eventCategory === categoryKey;
+                return event.category === categoryKey;
             }));
         }
     }, [selectedCategory, allEvents]);

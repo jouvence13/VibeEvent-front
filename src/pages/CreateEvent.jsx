@@ -312,10 +312,10 @@ const CreateEvent = () => {
                                     className="w-full bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200/60 rounded-2xl py-3 sm:py-3.5 px-4 sm:px-5 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500 transition-all appearance-none cursor-pointer"
                                 >
                                     <option value="Nightlife">Nightlife</option>
-                                    <option value="Concert">Concert</option>
-                                    <option value="Festival">Festival</option>
-                                    <option value="Workshop">Workshop</option>
-                                    <option value="Sport">Sport</option>
+                                    <option value="Concerts">Concerts</option>
+                                    <option value="Workshops">Workshops</option>
+                                    <option value="Expositions">Expositions</option>
+                                    <option value="Sports">Sports</option>
                                     <option value="Other">Autre</option>
                                 </select>
                             </div>
