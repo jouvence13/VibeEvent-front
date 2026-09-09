@@ -70,7 +70,7 @@ const Auth = () => {
 
 
     return (
-        <div className="h-screen overflow-hidden bg-white flex flex-col lg:flex-row font-['Inter'] selection:bg-red-500/30">
+        <div className="min-h-screen lg:h-screen lg:overflow-hidden bg-white flex flex-col lg:flex-row font-['Inter'] selection:bg-red-500/30">
             {/* Left Side - Visual */}
             <div className="hidden lg:flex lg:w-5/12 relative overflow-hidden bg-red-600 items-center justify-center p-8 xl:p-10 border-r border-red-200">
                 {/* Background Party Image with Overlay */}

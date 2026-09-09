@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, MapPin, Trash2, Edit3, Eye, Loader2, Plus, MoreHorizontal } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '../components/Toast';
 
 const EventsManagement = () => {
     const navigate = useNavigate();
+    const { showToast } = useToast();
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
 
     const fetchMyEvents = async () => {
+        setLoading(true);
+        setError(false);
         try {
             const token = localStorage.getItem('token');
             const response = await fetch('http://localhost:5000/api/events/my-events', {
@@ -16,9 +21,12 @@ const EventsManagement = () => {
             const data = await response.json();
             if (response.ok) {
                 setEvents(data);
+            } else {
+                setError(true);
             }
         } catch (err) {
             console.error(err);
+            setError(true);
         } finally {
             setLoading(false);
         }
@@ -39,9 +47,14 @@ const EventsManagement = () => {
             });
             if (response.ok) {
                 setEvents(prev => prev.filter(e => e._id !== eventId));
+                showToast('Événement supprimé.', 'success');
+            } else {
+                const data = await response.json().catch(() => ({}));
+                showToast(data.message || "Impossible de supprimer cet événement.", 'error');
             }
         } catch (err) {
             console.error(err);
+            showToast('Erreur réseau.', 'error');
         }
     };
 
@@ -67,6 +80,11 @@ const EventsManagement = () => {
             {loading ? (
                 <div className="flex justify-center py-20">
                     <Loader2 className="animate-spin text-slate-700" size={40} />
+                </div>
+            ) : error ? (
+                <div className="bg-white border border-red-200 rounded-[40px] p-16 sm:p-20 text-center shadow-[0_10px_30px_-20px_rgba(15,23,42,0.15)]">
+                    <p className="text-red-600 font-bold uppercase tracking-widest text-[10px] mb-6">Impossible de charger vos événements.</p>
+                    <button onClick={fetchMyEvents} className="text-slate-900 font-black text-sm hover:underline">Réessayer</button>
                 </div>
             ) : events.length === 0 ? (
                 <div className="bg-white border border-slate-200/70 rounded-[40px] p-16 sm:p-20 text-center shadow-[0_10px_30px_-20px_rgba(15,23,42,0.15)]">
@@ -98,9 +116,11 @@ const EventsManagement = () => {
                                         <span className="truncate max-w-[200px]">{event.location}</span>
                                     </div>
                                     <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${
-                                        event.status === 'published' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                                        event.status === 'published' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                                        event.status === 'cancelled' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
+                                        'bg-amber-500/10 text-amber-400 border-amber-500/20'
                                     }`}>
-                                        {event.status === 'published' ? 'Publié' : 'Brouillon'}
+                                        {event.status === 'published' ? 'Publié' : event.status === 'cancelled' ? 'Annulé' : 'Brouillon'}
                                     </span>
                                 </div>
                             </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 import { Scan, LogIn, LogOut, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 import { cn } from '../lib/utils';
@@ -7,6 +7,18 @@ const EventScanner = () => {
     const [scanMode, setScanMode] = useState('in'); // 'in' ou 'out'
     const [scanResult, setScanResult] = useState(null);
     const [scanning, setScanning] = useState(false);
+    // Read via a ref inside the scan callback so toggling the mode doesn't
+    // need to tear down and restart the camera stream.
+    const scanModeRef = useRef(scanMode);
+    const scanningRef = useRef(scanning);
+
+    useEffect(() => {
+        scanModeRef.current = scanMode;
+    }, [scanMode]);
+
+    useEffect(() => {
+        scanningRef.current = scanning;
+    }, [scanning]);
 
     useEffect(() => {
         const scanner = new Html5QrcodeScanner(
@@ -20,12 +32,12 @@ const EventScanner = () => {
         return () => {
             scanner.clear().catch(error => console.error("Failed to clear scanner", error));
         };
-    }, [scanMode]); // Re-render if mode changes to keep context fresh if needed, though not strictly required
+    }, []); // Init once: the camera stream shouldn't restart when the mode toggles
 
     const handleScanSuccess = async (decodedText) => {
-        if (scanning) return; // Empêcher les multi-scans
+        if (scanningRef.current) return; // Empêcher les multi-scans
         setScanning(true);
-        
+
         // Cacher le résultat précédent
         setScanResult(null);
 
@@ -37,7 +49,7 @@ const EventScanner = () => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ qrToken: decodedText, action: scanMode })
+                body: JSON.stringify({ qrToken: decodedText, action: scanModeRef.current })
             });
 
             const data = await response.json();
@@ -102,7 +114,7 @@ const EventScanner = () => {
                         scanResult.type === 'success' ? "bg-emerald-900/90 backdrop-blur-md text-emerald-400" : "bg-red-900/90 backdrop-blur-md text-red-400"
                     )}>
                         {scanResult.type === 'success' ? <CheckCircle2 size={80} className="mb-4" /> : <XCircle size={80} className="mb-4" />}
-                        <h2 className="text-3xl font-black text-slate-900 text-center mb-2 px-4">{scanResult.message}</h2>
+                        <h2 className="text-3xl font-black text-white text-center mb-2 px-4">{scanResult.message}</h2>
                         {scanResult.tier && <p className="text-xl font-bold uppercase py-2 px-6 border-2 border-current rounded-full">PASS {scanResult.tier}</p>}
                     </div>
                 )}

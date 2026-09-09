@@ -10,33 +10,41 @@ import {
 
 import { useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { formatRevenueByCurrency } from '../lib/utils';
 
 const Dashboard = () => {
     const navigate = useNavigate();
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
+
+    const fetchStats = async () => {
+        setLoading(true);
+        setError(false);
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                navigate('/auth');
+                return;
+            }
+            const response = await fetch('http://localhost:5000/api/events/stats', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setStats(data);
+            } else {
+                setError(true);
+            }
+        } catch (err) {
+            console.error(err);
+            setError(true);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchStats = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                if (!token) {
-                    navigate('/auth');
-                    return;
-                }
-                const response = await fetch('http://localhost:5000/api/events/stats', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    setStats(data);
-                }
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchStats();
     }, [navigate]);
 
@@ -48,13 +56,18 @@ const Dashboard = () => {
         );
     }
 
-    if (!stats) {
-        return <div className="p-10 text-slate-900">Erreur lors du chargement des statistiques.</div>;
+    if (error || !stats) {
+        return (
+            <div className="p-10 text-center">
+                <p className="text-slate-900 font-semibold mb-4">Erreur lors du chargement des statistiques.</p>
+                <button onClick={fetchStats} className="text-red-500 font-black text-sm hover:underline">Réessayer</button>
+            </div>
+        );
     }
 
     const statCards = [
         { label: 'Total Événements', value: stats.totalEvents, change: 'Créés', icon: Calendar, color: 'text-slate-700', bg: 'bg-slate-500/10' },
-        { label: 'Revenus', value: `${stats.totalRevenue} €`, change: 'Générés', icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-500/10' },
+        { label: 'Revenus', value: formatRevenueByCurrency(stats.revenueByCurrency), change: 'Générés', icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-500/10' },
         { label: 'Billets Vendus', value: stats.ticketsSold, change: 'Ventes', icon: Users, color: 'text-indigo-600', bg: 'bg-indigo-500/10' },
         { label: 'Participants Actifs', value: stats.scansIn, change: 'Scannés', icon: Zap, color: 'text-amber-600', bg: 'bg-amber-500/10' }
     ];
@@ -64,7 +77,7 @@ const Dashboard = () => {
             return (
                 <div className="bg-white p-4 border border-slate-200 rounded-xl shadow-2xl backdrop-blur-md">
                     <p className="font-bold text-slate-900 mb-2">{label}</p>
-                    <p className="text-emerald-400 text-sm font-black tracking-widest">{`Revenus : ${payload[0].value}€`}</p>
+                    <p className="text-emerald-400 text-sm font-black tracking-widest">{`Revenus : ${payload[0].value} ${payload[0].payload.currency || '€'}`}</p>
                     <p className="text-red-600 text-sm font-black tracking-widest mt-1">{`Participants : ${payload[0].payload.attendees}`}</p>
                 </div>
             );

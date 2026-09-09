@@ -6,7 +6,6 @@ import HomePage from './pages/HomePage';
 import Explore from './pages/Explore';
 import EventDetail from './pages/EventDetail';
 import MainLayout from './layouts/MainLayout';
-import Placeholder from './pages/Placeholder';
 import AdminDashboard from './pages/AdminDashboard';
 import Profile from './pages/Profile';
 import CreateEvent from './pages/CreateEvent';
@@ -21,18 +20,23 @@ import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentFailure from './pages/PaymentFailure';
 import './App.css';
 import { ToastProvider } from './components/Toast';
+import ProtectedRoute from './components/ProtectedRoute';
+
+const ORGANIZER_ROLES = ['organizer', 'admin'];
 
 function App() {
   return (
     <ToastProvider>
       <Routes>
         <Route path="/auth" element={<Auth />} />
-        
+        <Route path="/login" element={<Navigate to="/auth" replace />} />
+        <Route path="/register" element={<Navigate to="/auth" replace />} />
+
         {/* Public routes */}
         <Route path="/" element={<HomePage />} />
-        
-        {/* Unified Layout */}
-        <Route element={<MainLayout />}>
+
+        {/* Unified Layout - requires an authenticated session */}
+        <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
           {/* Attendee content */}
           <Route path="/explore" element={<Explore />} />
           <Route path="/voting" element={<Voting />} />
@@ -41,21 +45,22 @@ function App() {
           <Route path="/upgrade" element={<Upgrade />} />
           <Route path="/payment/success" element={<PaymentSuccess />} />
           <Route path="/payment/failed" element={<PaymentFailure />} />
-  
-          {/* Organizer content */}
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/dashboard/explore" element={<Explore />} />
-          <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/dashboard/events/create" element={<CreateEvent />} />
-          <Route path="/dashboard/events/edit/:id" element={<CreateEvent />} />
-          <Route path="/dashboard/scanner" element={<EventScanner />} />
-  
-          <Route path="/dashboard/events" element={<EventsManagement />} />
-          <Route path="/dashboard/analytics" element={<Analytics />} />
-          <Route path="/dashboard/attendees" element={<AttendeeList />} />
-          <Route path="/dashboard/voting" element={<PollManager />} />
+
+          {/* Organizer content */}
+          <Route path="/dashboard" element={<ProtectedRoute roles={ORGANIZER_ROLES}><Dashboard /></ProtectedRoute>} />
+          <Route path="/dashboard/explore" element={<Explore />} />
+          <Route path="/dashboard/events/create" element={<ProtectedRoute roles={ORGANIZER_ROLES}><CreateEvent /></ProtectedRoute>} />
+          <Route path="/dashboard/events/edit/:id" element={<ProtectedRoute roles={ORGANIZER_ROLES}><CreateEvent /></ProtectedRoute>} />
+          <Route path="/dashboard/scanner" element={<ProtectedRoute roles={ORGANIZER_ROLES}><EventScanner /></ProtectedRoute>} />
+          <Route path="/dashboard/events" element={<ProtectedRoute roles={ORGANIZER_ROLES}><EventsManagement /></ProtectedRoute>} />
+          <Route path="/dashboard/analytics" element={<ProtectedRoute roles={ORGANIZER_ROLES}><Analytics /></ProtectedRoute>} />
+          <Route path="/dashboard/attendees" element={<ProtectedRoute roles={ORGANIZER_ROLES}><AttendeeList /></ProtectedRoute>} />
+          <Route path="/dashboard/voting" element={<ProtectedRoute roles={ORGANIZER_ROLES}><PollManager /></ProtectedRoute>} />
           <Route path="/dashboard/settings" element={<Profile />} />
+
+          {/* Admin-only content */}
+          <Route path="/admin" element={<ProtectedRoute roles={['admin']}><AdminDashboard /></ProtectedRoute>} />
         </Route>
       </Routes>
     </ToastProvider>

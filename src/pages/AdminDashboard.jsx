@@ -1,19 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { ShieldCheck, Building2, UserCircle, CheckCircle, XCircle, Loader2, ListTree, MoreVertical, Calendar } from 'lucide-react';
+import { ShieldCheck, Building2, UserCircle, CheckCircle, XCircle, Loader2, ListTree, MoreVertical, Calendar, AlertTriangle } from 'lucide-react';
 import Modal from '../components/Modal';
 import { useToast } from '../components/Toast';
 
 const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState('requests'); // 'requests', 'users', 'organizations'
     const { showToast } = useToast();
-    
+
     const [requests, setRequests] = useState([]);
     const [users, setUsers] = useState([]);
     const [organizations, setOrganizations] = useState([]);
-    
+
     const [stats, setStats] = useState({ totalUsers: 0, totalOrganizations: 0, pendingRequests: 0 });
     const [loading, setLoading] = useState(true);
-    
+    const [failedResources, setFailedResources] = useState([]);
+
+
     // Approval Modal State
     const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
     const [selectedRequestId, setSelectedRequestId] = useState(null);
@@ -24,37 +26,40 @@ const AdminDashboard = () => {
         setLoading(true);
         const token = localStorage.getItem('token');
         const headers = { 'Authorization': `Bearer ${token}` };
+        const failures = [];
 
         try {
             // Fetch Requests
             const reqRes = await fetch('http://localhost:5000/api/auth/pending-upgrades', { headers });
             if (reqRes.ok) setRequests(await reqRes.json());
-        } catch (e) { console.error("Error fetching requests", e); }
+            else failures.push('demandes');
+        } catch (e) { console.error("Error fetching requests", e); failures.push('demandes'); }
 
         try {
             // Fetch Stats
             const statsRes = await fetch('http://localhost:5000/api/admin/stats', { headers });
             if (statsRes.ok) setStats(await statsRes.json());
-        } catch (e) { console.error("Error fetching stats", e); }
+            else failures.push('statistiques');
+        } catch (e) { console.error("Error fetching stats", e); failures.push('statistiques'); }
 
         try {
             // Fetch Users
             const usersRes = await fetch('http://localhost:5000/api/admin/users', { headers });
             if (usersRes.ok) setUsers(await usersRes.json());
-        } catch (e) { console.error("Error fetching users", e); }
+            else failures.push('utilisateurs');
+        } catch (e) { console.error("Error fetching users", e); failures.push('utilisateurs'); }
 
         try {
             // Fetch Organizations
             const orgsRes = await fetch('http://localhost:5000/api/admin/organizations', { headers });
             if (orgsRes.ok) {
-                const data = await orgsRes.json();
-                console.log("Orgs data fetched:", data);
-                setOrganizations(data);
+                setOrganizations(await orgsRes.json());
             } else {
-                console.warn("Organizations fetch failed with status:", orgsRes.status);
+                failures.push('organisations');
             }
-        } catch (e) { console.error("Error fetching organizations", e); }
+        } catch (e) { console.error("Error fetching organizations", e); failures.push('organisations'); }
 
+        setFailedResources(failures);
         setLoading(false);
     };
 
@@ -124,15 +129,16 @@ const AdminDashboard = () => {
                 fetchData(); // Refresh the list
             } else {
                 const data = await response.json();
-                alert(data.message);
+                showToast(data.message || "Action impossible.", "error");
             }
         } catch (err) {
             console.error(err);
+            showToast("Erreur réseau.", "error");
         }
     };
 
     return (
-        <div className="p-10 max-w-7xl mx-auto">
+        <div className="p-5 sm:p-8 lg:p-10 max-w-7xl mx-auto">
             <div className="mb-12">
                 <div className="flex items-center gap-3 mb-4">
                     <ShieldCheck className="text-red-500" size={32} />
@@ -141,17 +147,27 @@ const AdminDashboard = () => {
                 <p className="text-slate-500 font-medium">Contrôle global de la plateforme Evenflow.</p>
             </div>
 
+            {failedResources.length > 0 && (
+                <div className="mb-8 flex items-center gap-3 rounded-2xl border border-amber-300 bg-amber-50 px-5 py-4 text-amber-800">
+                    <AlertTriangle size={18} className="shrink-0" />
+                    <p className="text-sm font-medium">
+                        Certaines données n'ont pas pu être chargées ({failedResources.join(', ')}).
+                        <button onClick={fetchData} className="ml-2 font-bold underline hover:no-underline">Réessayer</button>
+                    </p>
+                </div>
+            )}
+
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-                <div className="bg-slate-100 border border-slate-200 rounded-[32px] p-8">
+                <div className="bg-slate-100 border border-slate-200 rounded-[32px] p-5 sm:p-8">
                     <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Total Utilisateurs</p>
                     <h3 className="text-4xl font-black tracking-tighter">{stats.totalUsers}</h3>
                 </div>
-                <div className="bg-slate-100 border border-slate-200 rounded-[32px] p-8">
+                <div className="bg-slate-100 border border-slate-200 rounded-[32px] p-5 sm:p-8">
                     <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Organisations Active</p>
                     <h3 className="text-4xl font-black tracking-tighter">{stats.totalOrganizations}</h3>
                 </div>
-                <div className="bg-slate-100 border border-slate-200 rounded-[32px] p-8 border-red-500/30 bg-red-500/10">
+                <div className="bg-slate-100 border border-slate-200 rounded-[32px] p-5 sm:p-8 border-red-500/30 bg-red-500/10">
                     <p className="text-[10px] font-black text-red-600 uppercase tracking-widest mb-1">Demandes en attente</p>
                     <h3 className="text-4xl font-black tracking-tighter text-red-600">{stats.pendingRequests}</h3>
                 </div>
@@ -190,7 +206,7 @@ const AdminDashboard = () => {
                         {activeTab === 'requests' && (
                             <div className="space-y-4">
                                 {requests.length === 0 ? (
-                                    <div className="bg-slate-100 border border-slate-200 rounded-[32px] p-20 text-center">
+                                    <div className="bg-slate-100 border border-slate-200 rounded-[32px] p-10 sm:p-20 text-center">
                                         <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Aucune demande en attente</p>
                                     </div>
                                 ) : (
@@ -228,8 +244,8 @@ const AdminDashboard = () => {
 
                         {/* TAB: USERS */}
                         {activeTab === 'users' && (
-                            <div className="bg-white border border-slate-200 rounded-[40px] overflow-hidden">
-                                <table className="w-full text-left">
+                            <div className="bg-white border border-slate-200 rounded-[40px] overflow-x-auto">
+                                <table className="w-full min-w-160 text-left">
                                     <thead className="bg-slate-100 border-b border-slate-200">
                                         <tr>
                                             <th className="p-6 text-[10px] font-black uppercase tracking-widest text-slate-500">Utilisateur</th>
@@ -365,10 +381,12 @@ const AdminDashboard = () => {
             >
                 <div className="space-y-6">
                     <p className="text-slate-500 text-sm font-medium">Définissez la durée de validité du statut organisateur pour cet utilisateur (en jours).</p>
+                    <label htmlFor="approve-duration-days" className="sr-only">Durée en jours</label>
                     <div className="relative">
                         <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                        <input 
-                            type="number" 
+                        <input
+                            id="approve-duration-days"
+                            type="number"
                             value={durationDays}
                             onChange={(e) => setDurationDays(e.target.value)}
                             placeholder="30"

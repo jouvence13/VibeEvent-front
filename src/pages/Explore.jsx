@@ -132,7 +132,7 @@ const Explore = () => {
         <div className="w-full">
             <main className="pb-20">
                 {/* Hero section */}
-                <div className="relative w-full h-[50vh] lg:h-[70vh] px-4 lg:px-12 pt-4 lg:pt-8 mb-8 lg:mb-16 group">
+                <div className="relative w-full min-h-[440px] h-[60vh] lg:h-[70vh] lg:min-h-[560px] px-4 lg:px-12 pt-4 lg:pt-8 mb-8 lg:mb-16 group">
                     <div className="w-full h-full relative rounded-4xl lg:rounded-[48px] overflow-hidden">
                         <img 
                             src="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=1600&q=80" 
@@ -152,7 +152,7 @@ const Explore = () => {
                             <h1 className="text-4xl md:text-5xl lg:text-7xl font-black tracking-tighter mb-4 lg:mb-8 leading-[0.9] text-white">
                                 Luminous <br /> Echoes 2024
                             </h1>
-                            <p className="text-white text-sm lg:text-lg font-medium mb-6 lg:mb-10 max-w-xl leading-relaxed lg:block hidden">
+                            <p className="text-white text-sm lg:text-lg font-medium mb-6 lg:mb-10 max-w-xl leading-relaxed">
                                 Découvrez la première mondiale de l'expérience audio-visuelle la plus immersive de la décennie.
                             </p>
                             <div className="flex flex-col sm:flex-row gap-3 lg:gap-4">

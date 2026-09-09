@@ -157,15 +157,15 @@ const Profile = () => {
                         <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 -mr-20 -mt-20 rounded-full blur-[80px]"></div>
                         
                         <div className="relative z-10">
-                            <div className="flex items-center justify-between mb-6 flex-nowrap">
+                            <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-700">
+                                    <div className="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-700 shrink-0">
                                         <ArrowUpCircle size={24} />
                                     </div>
-                                    <h2 className="text-xl sm:text-2xl font-black tracking-tight whitespace-nowrap">Mon Abonnement</h2>
+                                    <h2 className="text-xl sm:text-2xl font-black tracking-tight">Mon Abonnement</h2>
                                 </div>
                                 <span className={cn(
-                                    "ml-3 mr-3 shrink-0 px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest border",
+                                    "shrink-0 px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest border",
                                     user.plan && user.plan !== 'none' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "bg-slate-100 text-slate-400 border-slate-200"
                                 )}>
                                     {user.plan === 'premium' ? 'Suite Complète' : user.plan === 'events_only' ? 'Événements' : user.plan === 'polls_only' ? 'Sondages' : 'Aucun'}
@@ -234,8 +234,10 @@ const Profile = () => {
             >
                 <div className="space-y-4">
                     <p className="text-slate-500 text-sm font-medium">Donnez un nom unique à votre structure pour commencer à organiser des événements.</p>
-                    <input 
-                        type="text" 
+                    <label htmlFor="new-org-name" className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Nom de l'organisation</label>
+                    <input
+                        id="new-org-name"
+                        type="text"
                         value={newOrgName}
                         onChange={(e) => setNewOrgName(e.target.value)}
                         placeholder="Ex: Visionary Events"

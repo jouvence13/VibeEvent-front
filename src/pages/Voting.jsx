@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Vote, Users, TrendingUp, CheckCircle2, Loader2, Sparkles, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '../components/Toast';
 
 const Voting = () => {
     const navigate = useNavigate();
+    const { showToast } = useToast();
     const [polls, setPolls] = useState([]);
     const [loading, setLoading] = useState(true);
     const [myTickets, setMyTickets] = useState([]);
+    const [error, setError] = useState(false);
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
 
     const fetchData = async () => {
         setLoading(true);
+        setError(false);
         try {
             const token = localStorage.getItem('token');
             if(!token) {
@@ -25,8 +29,9 @@ const Voting = () => {
             const tickets = await ticketRes.json();
             setMyTickets(tickets);
 
-            // 2. Fetch polls for those events
-            const eventIds = [...new Set(tickets.map(t => t.event._id))];
+            // 2. Fetch polls for those events (a ticket's event can be null if the
+            // organizer deleted the event after tickets were sold)
+            const eventIds = [...new Set(tickets.filter(t => t.event).map(t => t.event._id))];
             
             const pollPromises = eventIds.map(id => 
                 fetch(`http://localhost:5000/api/polls/event/${id}`, {
@@ -39,6 +44,7 @@ const Voting = () => {
 
         } catch (err) {
             console.error(err);
+            setError(true);
         } finally {
             setLoading(false);
         }
@@ -64,10 +70,11 @@ const Voting = () => {
                 fetchData(); // Refresh to see live results
             } else {
                 const data = await response.json();
-                alert(data.message);
+                showToast(data.message || "Vote impossible.", "error");
             }
         } catch (err) {
             console.error(err);
+            showToast("Erreur réseau.", "error");
         }
     };
 
@@ -97,13 +104,26 @@ const Voting = () => {
                 </p>
             </div>
 
-            {polls.length === 0 ? (
+            {error ? (
+                <div className="bg-white border border-red-200 rounded-[36px] sm:rounded-[48px] p-10 sm:p-16 lg:p-20 text-center shadow-[0_10px_30px_-24px_rgba(15,23,42,0.2)]">
+                    <AlertCircle className="mx-auto text-red-500 mb-6" size={48} />
+                    <p className="text-red-600 font-bold uppercase tracking-widest text-xs">
+                        Impossible de charger les sondages. Vérifiez votre connexion et réessayez.
+                    </p>
+                    <button
+                        onClick={fetchData}
+                        className="mt-8 text-red-500 font-black text-sm hover:underline"
+                    >
+                        Réessayer
+                    </button>
+                </div>
+            ) : polls.length === 0 ? (
                 <div className="bg-white border border-slate-200 rounded-[36px] sm:rounded-[48px] p-10 sm:p-16 lg:p-20 text-center shadow-[0_10px_30px_-24px_rgba(15,23,42,0.2)]">
                     <AlertCircle className="mx-auto text-slate-700 mb-6" size={48} />
                     <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">
                         Aucun sondage disponible. Achetez des billets pour débloquer les votes.
                     </p>
-                    <button 
+                    <button
                         onClick={() => navigate('/explore')}
                         className="mt-8 text-red-500 font-black text-sm hover:underline"
                     >

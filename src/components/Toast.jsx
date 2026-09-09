@@ -22,12 +22,12 @@ export const ToastProvider = ({ children }) => {
     return (
         <ToastContext.Provider value={{ showToast }}>
             {children}
-            <div className="fixed bottom-8 right-8 z-[200] flex flex-col gap-3 pointer-events-none">
+            <div className="fixed inset-x-4 bottom-4 sm:inset-x-auto sm:bottom-8 sm:right-8 z-[200] flex flex-col gap-3 pointer-events-none">
                 {toasts.map((toast) => (
-                    <div 
+                    <div
                         key={toast.id}
                         className={cn(
-                            "pointer-events-auto min-w-[320px] max-w-md bg-white border rounded-[32px] p-5 shadow-2xl flex items-start gap-4 animate-in slide-in-from-right-10 duration-300",
+                            "pointer-events-auto w-full sm:w-auto sm:min-w-80 max-w-md bg-white border rounded-[32px] p-5 shadow-2xl flex items-start gap-4 animate-in slide-in-from-right-10 duration-300",
                             toast.type === 'success' ? "border-emerald-500/20" : 
                             toast.type === 'error' ? "border-red-500/20" : "border-slate-200"
                         )}

@@ -11,33 +11,13 @@ import {
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { cn } from '../lib/utils';
-
-const loadFedaPayCheckout = () => {
-    if (window.FedaPay) {
-        return Promise.resolve();
-    }
-
-    return new Promise((resolve, reject) => {
-        const existingScript = document.querySelector('script[src="https://cdn.fedapay.com/checkout.js?v=1.1.7"]');
-
-        if (existingScript) {
-            existingScript.addEventListener('load', () => resolve(), { once: true });
-            existingScript.addEventListener('error', () => reject(new Error('Unable to load FedaPay checkout')), { once: true });
-            return;
-        }
-
-        const script = document.createElement('script');
-        script.src = 'https://cdn.fedapay.com/checkout.js?v=1.1.7';
-        script.async = true;
-        script.onload = () => resolve();
-        script.onerror = () => reject(new Error('Unable to load FedaPay checkout'));
-        document.body.appendChild(script);
-    });
-};
+import { useToast } from '../components/Toast';
+import { loadFedaPayCheckout } from '../lib/fedapayCheckout';
 
 const EventDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { showToast } = useToast();
     const [event, setEvent] = useState(null);
     const [loading, setLoading] = useState(true);
     const [purchasing, setPurchasing] = useState(false);
@@ -209,11 +189,11 @@ const EventDetail = () => {
 
                 checkout.open();
             } else {
-                alert(data.message || 'Erreur lors de l\'achat');
+                showToast(data.message || "Erreur lors de l'achat.", "error");
             }
         } catch (err) {
             console.error(err);
-            alert('Erreur réseau');
+            showToast('Erreur réseau.', 'error');
         } finally {
             setPurchasing(false);
         }

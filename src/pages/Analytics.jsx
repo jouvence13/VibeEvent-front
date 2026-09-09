@@ -10,29 +10,37 @@ import {
     AreaChart,
     Area
 } from 'recharts';
-import { TrendingUp, Users, Ticket, DollarSign, Loader2, ArrowUpRight } from 'lucide-react';
+import { TrendingUp, Users, Ticket, DollarSign, Loader2, AlertCircle } from 'lucide-react';
+import { formatRevenueByCurrency } from '../lib/utils';
 
 const Analytics = () => {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
+
+    const fetchStats = async () => {
+        setLoading(true);
+        setError(false);
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:5000/api/events/stats', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setStats(data);
+            } else {
+                setError(true);
+            }
+        } catch (err) {
+            console.error(err);
+            setError(true);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchStats = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                const response = await fetch('http://localhost:5000/api/events/stats', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    setStats(data);
-                }
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchStats();
     }, []);
 
@@ -47,8 +55,20 @@ const Analytics = () => {
         );
     }
 
+    if (error || !stats) {
+        return (
+            <div className="flex justify-center items-center h-[calc(100vh-80px)] bg-gradient-to-br from-white via-slate-50 to-slate-100/60 px-4">
+                <div className="text-center max-w-sm">
+                    <AlertCircle className="mx-auto text-red-500 mb-4" size={40} />
+                    <p className="text-slate-700 font-bold mb-4">Impossible de charger les analyses. Vérifiez votre connexion.</p>
+                    <button onClick={fetchStats} className="text-red-500 font-black text-sm hover:underline">Réessayer</button>
+                </div>
+            </div>
+        );
+    }
+
     const statCards = [
-        { label: 'Revenu Total', value: `${stats.totalRevenue}€`, icon: DollarSign, color: 'text-emerald-500', bg: 'from-emerald-500/20 to-emerald-500/5', border: 'border-emerald-200/40' },
+        { label: 'Revenu Total', value: formatRevenueByCurrency(stats.revenueByCurrency), icon: DollarSign, color: 'text-emerald-500', bg: 'from-emerald-500/20 to-emerald-500/5', border: 'border-emerald-200/40' },
         { label: 'Billets Vendus', value: stats.ticketsSold, icon: Ticket, color: 'text-red-500', bg: 'from-red-500/20 to-red-500/5', border: 'border-red-200/40' },
         { label: 'Taux de Présence', value: stats.ticketsSold > 0 ? `${Math.round((stats.scansIn / stats.ticketsSold) * 100)}%` : '0%', icon: Users, color: 'text-blue-500', bg: 'from-blue-500/20 to-blue-500/5', border: 'border-blue-200/40' },
         { label: 'Événements', value: stats.totalEvents, icon: TrendingUp, color: 'text-orange-500', bg: 'from-orange-500/20 to-orange-500/5', border: 'border-orange-200/40' },
@@ -80,10 +100,6 @@ const Analytics = () => {
                             
                             <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1 relative z-10">{card.label}</p>
                             <h3 className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tighter text-slate-900 leading-none relative z-10">{card.value}</h3>
-                            
-                            <div className="mt-3 flex items-center gap-2 text-slate-500 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider relative z-10">
-                                <ArrowUpRight size={12} className="text-emerald-500" /> +12.5% vs mois dernier
-                            </div>
                         </div>
                     ))}
                 </div>

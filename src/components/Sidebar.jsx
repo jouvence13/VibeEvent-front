@@ -59,22 +59,26 @@ const Sidebar = ({ user, isOpen, setIsOpen }) => {
 
     const handleLogout = () => {
         localStorage.removeItem('user');
+        localStorage.removeItem('token');
         navigate('/auth');
     };
 
     return (
-        <aside className={cn(
-            "w-72 h-screen bg-gradient-to-b from-white via-slate-50 to-slate-50 border-r border-slate-200/60 flex flex-col fixed left-0 top-0 z-[60] overflow-y-hidden custom-scrollbar transition-transform duration-300 lg:translate-x-0",
-            isOpen ? "translate-x-0" : "-translate-x-full"
-        )}>
-            {/* Mobile close overlay */}
-            <div 
+        <>
+            {/* Mobile close overlay - kept as a sibling of the transformed <aside> so it stays
+                positioned against the viewport instead of the aside's own containing block */}
+            <div
                 className={cn(
-                    "fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[-1] lg:hidden transition-opacity duration-300",
+                    "fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-55 lg:hidden transition-opacity duration-300",
                     isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
                 )}
                 onClick={() => setIsOpen(false)}
+                aria-hidden="true"
             />
+            <aside className={cn(
+                "w-72 h-screen bg-gradient-to-b from-white via-slate-50 to-slate-50 border-r border-slate-200/60 flex flex-col fixed left-0 top-0 z-[60] overflow-y-auto custom-scrollbar transition-transform duration-300 lg:translate-x-0",
+                isOpen ? "translate-x-0" : "-translate-x-full"
+            )}>
             <div className="p-5 pb-3 flex-shrink-0">
                 <div className="flex items-center gap-2.5 mb-5 cursor-pointer" onClick={() => navigate('/explore')}>
                     <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-red-600 to-red-500 shadow-lg shadow-red-500/20"></div>
@@ -170,7 +174,7 @@ const Sidebar = ({ user, isOpen, setIsOpen }) => {
 
             </div>
 
-            <div className="mt-auto p-5 pt-3 border-t border-slate-200/40 bg-gradient-to-b from-transparent to-slate-100/30">
+            <div className="sticky bottom-0 mt-auto p-5 pt-3 border-t border-slate-200/40 bg-white/95 backdrop-blur-sm">
                 <button 
                     onClick={handleLogout}
                     className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-slate-600 hover:text-red-500 hover:bg-red-500/5 transition-colors group"
@@ -179,7 +183,8 @@ const Sidebar = ({ user, isOpen, setIsOpen }) => {
                     <span className="text-xs font-bold tracking-tight">Déconnexion</span>
                 </button>
             </div>
-        </aside>
+            </aside>
+        </>
     );
 };
 

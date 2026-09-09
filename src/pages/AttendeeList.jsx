@@ -10,6 +10,8 @@ const AttendeeList = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [isMobile, setIsMobile] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [eventsError, setEventsError] = useState(false);
+    const [attendeesError, setAttendeesError] = useState(false);
 
     useEffect(() => {
         const fetchEvents = async () => {
@@ -21,9 +23,12 @@ const AttendeeList = () => {
                 const data = await response.json();
                 if (response.ok) {
                     setEvents(data);
+                } else {
+                    setEventsError(true);
                 }
             } catch (err) {
                 console.error(err);
+                setEventsError(true);
             } finally {
                 setLoading(false);
             }
@@ -41,6 +46,7 @@ const AttendeeList = () => {
     const fetchAttendees = async (eventId) => {
         setSelectedEvent(eventId);
         setAttendeesLoading(true);
+        setAttendeesError(false);
         if (window.innerWidth < 640) setMobileOpen(true);
         try {
             const token = localStorage.getItem('token');
@@ -50,9 +56,14 @@ const AttendeeList = () => {
             const data = await response.json();
             if (response.ok) {
                 setAttendees(data);
+            } else {
+                setAttendees([]);
+                setAttendeesError(true);
             }
         } catch (err) {
             console.error(err);
+            setAttendees([]);
+            setAttendeesError(true);
         } finally {
             setAttendeesLoading(false);
         }
@@ -84,8 +95,11 @@ const AttendeeList = () => {
 
             <div className="flex flex-1 gap-8 min-h-0 overflow-hidden">
                 {/* Events Column */}
-                <div className={`${mobileOpen ? 'hidden sm:block' : ''} w-80 border-r border-slate-200 pr-8 space-y-4 overflow-y-auto custom-scrollbar`}>
+                <div className={`${mobileOpen ? 'hidden sm:block' : ''} w-full sm:w-80 border-r-0 sm:border-r border-slate-200 pr-0 sm:pr-8 space-y-4 overflow-y-auto custom-scrollbar`}>
                     <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-2 mb-4">Vos Événements</p>
+                    {eventsError && (
+                        <p className="px-2 text-xs font-semibold text-red-600">Impossible de charger vos événements. Vérifiez votre connexion.</p>
+                    )}
                     {events.map((event) => (
                         <button 
                             key={event._id}
@@ -134,6 +148,10 @@ const AttendeeList = () => {
                                 {attendeesLoading ? (
                                     <div className="flex justify-center py-20">
                                         <Loader2 className="animate-spin text-slate-700" size={32} />
+                                    </div>
+                                ) : attendeesError ? (
+                                    <div className="text-center py-20 text-red-600 font-bold uppercase tracking-widest text-[10px]">
+                                        Impossible de charger les participants. Réessayez plus tard.
                                     </div>
                                 ) : filteredAttendees.length === 0 ? (
                                     <div className="text-center py-20 text-slate-500 font-bold uppercase tracking-widest text-[10px]">

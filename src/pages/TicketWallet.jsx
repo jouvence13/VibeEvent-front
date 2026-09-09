@@ -6,26 +6,37 @@ import { cn } from '../lib/utils';
 const TicketWallet = () => {
     const [tickets, setTickets] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [ticketsError, setTicketsError] = useState(false);
     const [selectedTicket, setSelectedTicket] = useState(null);
     const [qrToken, setQrToken] = useState(null);
+    const [qrError, setQrError] = useState(false);
     const [timeLeft, setTimeLeft] = useState(60);
     const [isMobile, setIsMobile] = useState(false);
+    const [qrRetryKey, setQrRetryKey] = useState(0);
+
+    const fetchTickets = async () => {
+        setLoading(true);
+        setTicketsError(false);
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:5000/api/tickets/my-tickets', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setTickets(data);
+            } else {
+                setTicketsError(true);
+            }
+        } catch (err) {
+            console.error(err);
+            setTicketsError(true);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchTickets = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                const response = await fetch('http://localhost:5000/api/tickets/my-tickets', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await response.json();
-                if (response.ok) setTickets(data);
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchTickets();
     }, []);
 
@@ -40,6 +51,8 @@ const TicketWallet = () => {
     useEffect(() => {
         if (!selectedTicket) return;
 
+        setQrToken(null);
+        setQrError(false);
         let isSubscribed = true;
 
         const generateQR = async () => {
@@ -49,12 +62,17 @@ const TicketWallet = () => {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const data = await response.json();
-                if (response.ok && isSubscribed) {
+                if (!isSubscribed) return;
+                if (response.ok) {
                     setQrToken(data.qrToken);
-                    setTimeLeft(60); // Reset timer 
+                    setQrError(false);
+                    setTimeLeft(60); // Reset timer
+                } else {
+                    setQrError(true);
                 }
             } catch (err) {
                 console.error(err);
+                if (isSubscribed) setQrError(true);
             }
         };
 
@@ -70,7 +88,7 @@ const TicketWallet = () => {
             clearInterval(qrInterval);
             clearInterval(tickInterval);
         };
-    }, [selectedTicket]);
+    }, [selectedTicket, qrRetryKey]);
 
     if (loading) return <div className="p-10 flex justify-center text-red-500"><RefreshCw className="animate-spin" size={40} /></div>;
 
@@ -85,7 +103,12 @@ const TicketWallet = () => {
                     <p className="text-sm sm:text-base text-slate-500 font-medium mt-2">Retrouvez tous vos billets d'accès ici.</p>
                 </div>
 
-                {tickets.length === 0 ? (
+                {ticketsError ? (
+                    <div className="bg-red-50 border border-red-200 rounded-3xl p-16 text-center">
+                        <p className="text-red-600 font-bold uppercase tracking-widest text-xs mb-4">Impossible de charger vos billets.</p>
+                        <button onClick={fetchTickets} className="text-red-600 font-black text-sm hover:underline">Réessayer</button>
+                    </div>
+                ) : tickets.length === 0 ? (
                     <div className="bg-slate-100 border border-slate-200 rounded-3xl p-16 text-center text-slate-500 font-bold uppercase tracking-widest text-xs">
                         Aucun billet pour le moment.
                     </div>
@@ -157,10 +180,16 @@ const TicketWallet = () => {
 
                         {/* QR Code Container */}
                         <div className="bg-white p-4 rounded-3xl mx-auto w-64 h-64 flex items-center justify-center relative overflow-hidden">
-                            {qrToken ? (
-                                <QRCodeSVG 
-                                    value={qrToken} 
-                                    size={220} 
+                            {qrError ? (
+                                <div className="text-center px-4">
+                                    <AlertCircle className="mx-auto text-red-500 mb-3" size={32} />
+                                    <p className="text-xs font-bold text-slate-600 mb-3">Code QR indisponible.</p>
+                                    <button onClick={() => setQrRetryKey(k => k + 1)} className="text-red-500 font-black text-xs uppercase tracking-widest hover:underline">Réessayer</button>
+                                </div>
+                            ) : qrToken ? (
+                                <QRCodeSVG
+                                    value={qrToken}
+                                    size={220}
                                     level="H"
                                     bgColor={"#ffffff"}
                                     fgColor={"#000000"}
@@ -218,7 +247,13 @@ const TicketWallet = () => {
                         </div>
 
                         <div className="bg-white p-4 rounded-3xl mx-auto w-56 h-56 flex items-center justify-center relative overflow-hidden shadow-sm border border-slate-100">
-                            {qrToken ? (
+                            {qrError ? (
+                                <div className="text-center px-4">
+                                    <AlertCircle className="mx-auto text-red-500 mb-3" size={28} />
+                                    <p className="text-xs font-bold text-slate-600 mb-3">Code QR indisponible.</p>
+                                    <button onClick={() => setQrRetryKey(k => k + 1)} className="text-red-500 font-black text-xs uppercase tracking-widest hover:underline">Réessayer</button>
+                                </div>
+                            ) : qrToken ? (
                                 <QRCodeSVG
                                     value={qrToken}
                                     size={190}

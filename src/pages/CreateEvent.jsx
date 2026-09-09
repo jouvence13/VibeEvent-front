@@ -141,6 +141,12 @@ const CreateEvent = () => {
             return;
         }
 
+        if (formData.date && new Date(formData.date) < new Date()) {
+            showToast("La date de l'événement ne peut pas être dans le passé.", "error");
+            setLoading(false);
+            return;
+        }
+
         const payload = {
             ...formData,
             tickets: formattedTickets
@@ -237,10 +243,11 @@ const CreateEvent = () => {
                         <div className="rounded-[32px] sm:rounded-[40px] border border-slate-200/80 bg-white shadow-[0_8px_32px_-8px_rgba(15,23,42,0.1)] hover:shadow-[0_24px_64px_-12px_rgba(15,23,42,0.15)] transition-all duration-300 p-6 sm:p-8 lg:p-10">
                             <div className="space-y-6">
                                 <div>
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-0.5 mb-3 block">Titre de l'événement</label>
-                                    <input 
+                                    <label htmlFor="event-title" className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-0.5 mb-3 block">Titre de l'événement</label>
+                                    <input
+                                        id="event-title"
                                         name="title"
-                                        type="text" 
+                                        type="text"
                                         required
                                         placeholder="Ex: Soirée Cyberpunk 2077"
                                         value={formData.title}
@@ -250,8 +257,9 @@ const CreateEvent = () => {
                                 </div>
 
                                 <div>
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-0.5 mb-3 block">Description de l'événement</label>
-                                    <textarea 
+                                    <label htmlFor="event-description" className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-0.5 mb-3 block">Description de l'événement</label>
+                                    <textarea
+                                        id="event-description"
                                         name="description"
                                         rows="4"
                                         required
@@ -271,13 +279,15 @@ const CreateEvent = () => {
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                             {/* Date */}
                             <div className="rounded-[28px] border border-slate-200/80 bg-white shadow-[0_8px_32px_-8px_rgba(15,23,42,0.1)] p-5 sm:p-6">
-                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-0.5 mb-3 block flex items-center gap-2">
+                                <label htmlFor="event-date" className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-0.5 mb-3 block flex items-center gap-2">
                                     <Calendar size={12} className="text-red-500" /> Date & Heure
                                 </label>
-                                <input 
+                                <input
+                                    id="event-date"
                                     name="date"
-                                    type="datetime-local" 
+                                    type="datetime-local"
                                     required
+                                    min={new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
                                     value={formData.date}
                                     onChange={handleChange}
                                     className="w-full bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200/60 rounded-2xl py-3 sm:py-3.5 px-4 sm:px-5 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500 transition-all"
@@ -286,10 +296,11 @@ const CreateEvent = () => {
 
                             {/* Location */}
                             <div className="rounded-[28px] border border-slate-200/80 bg-white shadow-[0_8px_32px_-8px_rgba(15,23,42,0.1)] p-5 sm:p-6">
-                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-0.5 mb-3 block flex items-center gap-2">
+                                <label htmlFor="event-location" className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-0.5 mb-3 block flex items-center gap-2">
                                     <MapPin size={12} className="text-red-500" /> Localisation
                                 </label>
-                                <input 
+                                <input
+                                    id="event-location"
                                     name="location"
                                     type="text"
                                     required
@@ -302,10 +313,11 @@ const CreateEvent = () => {
 
                             {/* Category */}
                             <div className="rounded-[28px] border border-slate-200/80 bg-white shadow-[0_8px_32px_-8px_rgba(15,23,42,0.1)] p-5 sm:p-6">
-                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-0.5 mb-3 block flex items-center gap-2">
+                                <label htmlFor="event-category" className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-0.5 mb-3 block flex items-center gap-2">
                                     <Tag size={12} className="text-red-500" /> Catégorie
                                 </label>
-                                <select 
+                                <select
+                                    id="event-category"
                                     name="category"
                                     value={formData.category}
                                     onChange={handleChange}
@@ -323,10 +335,11 @@ const CreateEvent = () => {
 
                         {/* Maps Link */}
                         <div className="mt-4 sm:mt-6 rounded-[28px] border border-slate-200/80 bg-white shadow-[0_8px_32px_-8px_rgba(15,23,42,0.1)] p-5 sm:p-6">
-                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-0.5 mb-3 block flex items-center gap-2">
+                            <label htmlFor="event-maps-link" className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-0.5 mb-3 block flex items-center gap-2">
                                 <Globe size={12} className="text-red-500" /> Lien Google Maps (Optionnel)
                             </label>
-                            <input 
+                            <input
+                                id="event-maps-link"
                                 name="googleMapsLink"
                                 type="url"
                                 placeholder="https://maps.google.com/..."
@@ -352,8 +365,9 @@ const CreateEvent = () => {
                                     </div>
                                 </div>
                                 <div className="w-full sm:w-auto">
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.15em] block mb-2">Devise</label>
-                                    <select 
+                                    <label htmlFor="event-currency" className="text-[10px] font-black text-slate-500 uppercase tracking-[0.15em] block mb-2">Devise</label>
+                                    <select
+                                        id="event-currency"
                                         name="currency"
                                         value={formData.currency}
                                         onChange={handleChange}

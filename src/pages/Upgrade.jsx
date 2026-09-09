@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Calendar, BarChart2, Star, Check, Loader2 } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { useToast } from '../components/Toast';
+import { loadFedaPayCheckout } from '../lib/fedapayCheckout';
 
 const Upgrade = () => {
-    const navigate = useNavigate();
+    const { showToast } = useToast();
     const [loading, setLoading] = useState(null);
     const [currency, setCurrency] = useState('EUR');
     const [rate, setRate] = useState(1);
@@ -34,31 +35,74 @@ const Upgrade = () => {
         setLoading(plan);
         try {
             const token = localStorage.getItem('token');
+            const checkoutScriptPromise = loadFedaPayCheckout();
+
             const response = await fetch('http://localhost:5000/api/auth/upgrade-request', {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` 
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({ plan })
             });
 
-            if (response.ok) {
-                const data = await response.json();
-                localStorage.setItem('user', JSON.stringify(data.user));
-                
-                // Force a page reload to resync the Sidebar options globally
-                window.location.href = '/dashboard';
-            } else {
-                const errData = await response.json();
-                alert(errData.message || "Erreur de paiement simulée.");
+            const data = await response.json();
+
+            if (!response.ok) {
+                showToast(data.message || "Erreur lors de la demande d'abonnement.", "error");
+                setLoading(null);
+                return;
             }
+
+            await checkoutScriptPromise;
+
+            const checkout = window.FedaPay.init({
+                public_key: data.publicKey,
+                transaction: { id: data.transactionId },
+                onComplete: async (_reason, transaction) => {
+                    if (transaction?.status === 'approved') {
+                        try {
+                            const confirmRes = await fetch('http://localhost:5000/api/auth/confirm-upgrade', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`
+                                },
+                                body: JSON.stringify({ transactionId: data.transactionId })
+                            });
+                            const confirmData = await confirmRes.json();
+
+                            if (confirmRes.ok) {
+                                localStorage.setItem('user', JSON.stringify(confirmData.user));
+                                // Force a page reload to resync the Sidebar options globally
+                                window.location.href = '/dashboard';
+                                return;
+                            }
+
+                            showToast(confirmData.message || 'Paiement reçu, synchronisation en cours.', 'error');
+                        } catch (err) {
+                            console.error(err);
+                            showToast('Paiement reçu, synchronisation en cours.', 'error');
+                        }
+                    } else {
+                        showToast('Paiement non finalisé.', 'error');
+                    }
+                    setLoading(null);
+                }
+            });
+
+            checkout.open();
         } catch (err) {
             console.error(err);
-            alert("Erreur de connexion serveur.");
-        } finally {
+            showToast("Erreur de connexion serveur.", "error");
             setLoading(null);
         }
+    };
+
+    const iconColorClasses = {
+        blue: 'text-blue-500',
+        red: 'text-red-500',
+        emerald: 'text-emerald-500'
     };
 
     const plans = [
@@ -107,7 +151,7 @@ const Upgrade = () => {
                         key={p.id} 
                         className={cn(
                             "bg-white rounded-[40px] p-8 border-2 transition-all hover:-translate-y-2 relative flex flex-col h-full",
-                            p.popular ? "border-red-500 shadow-2xl shadow-red-500/10 scale-105 z-10" : "border-slate-200 shadow-xl shadow-slate-200/50"
+                            p.popular ? "border-red-500 shadow-2xl shadow-red-500/10 lg:scale-105 z-10" : "border-slate-200 shadow-xl shadow-slate-200/50"
                         )}
                     >
                         {p.popular && (
@@ -117,7 +161,7 @@ const Upgrade = () => {
                         )}
 
                         <div className="mb-6 flex justify-between items-start">
-                            <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center bg-slate-50", `text-${p.color}-500`)}>
+                            <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center bg-slate-50", iconColorClasses[p.color])}>
                                 {p.icon}
                             </div>
                         </div>
@@ -164,7 +208,7 @@ const Upgrade = () => {
             </div>
             
             <div className="mt-16 text-center text-slate-400 text-xs">
-                Ceci est un environnement de test sécurisé. La procédure de paiement est purement simulée.
+                Paiement sécurisé par FedaPay. Votre abonnement est activé dès la confirmation du paiement.
             </div>
         </div>
     );

@@ -60,9 +60,11 @@ const MainLayout = () => {
             <div className="lg:pl-72 flex-1 flex flex-col w-full max-w-full overflow-x-hidden">
                 <header className="h-20 border-b border-slate-200/60 flex items-center justify-between px-6 lg:px-12 fixed left-0 lg:left-72 right-0 top-0 bg-white/80 backdrop-blur-2xl z-[40] shadow-[0_8px_30px_-20px_rgba(15,23,42,0.25)]">
                     {/* Mobile Toggle */}
-                    <button 
+                    <button
                         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                         className="lg:hidden p-3 bg-slate-100/50 border border-slate-200 rounded-2xl text-slate-900 mr-4 active:scale-95 transition-all"
+                        aria-label={isSidebarOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+                        aria-expanded={isSidebarOpen}
                     >
                         {isSidebarOpen ? <X size={18} /> : <Menu size={18} />}
                     </button>
@@ -78,7 +80,7 @@ const MainLayout = () => {
 
                     <div className="flex items-center gap-4 lg:gap-8 ml-auto">
                         <div className="flex items-center gap-4 border-r border-slate-200/60 pr-6 mr-2 hidden sm:flex">
-                            <div className="relative group cursor-pointer">
+                            <div className="relative group cursor-pointer" aria-hidden="true">
                                 <div className="p-2.5 bg-slate-100/50 rounded-xl hover:bg-slate-200/50 transition-colors">
                                     <Bell className="text-slate-500 group-hover:text-slate-900 transition-colors" size={18} />
                                 </div>
