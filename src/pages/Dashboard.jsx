@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 
 import { useNavigate } from 'react-router-dom';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { ComposedChart, Bar, Line, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { formatRevenueByCurrency } from '../lib/utils';
 
 const Dashboard = () => {
@@ -75,10 +75,10 @@ const Dashboard = () => {
     const CustomTooltip = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
             return (
-                <div className="bg-white p-4 border border-slate-200 rounded-xl shadow-2xl backdrop-blur-md">
-                    <p className="font-bold text-slate-900 mb-2">{label}</p>
-                    <p className="text-emerald-400 text-sm font-black tracking-widest">{`Revenus : ${payload[0].value} ${payload[0].payload.currency || '€'}`}</p>
-                    <p className="text-red-600 text-sm font-black tracking-widest mt-1">{`Participants : ${payload[0].payload.attendees}`}</p>
+                <div className="bg-white p-3 border border-slate-200 rounded-xl shadow-2xl">
+                    <p className="font-bold text-xs text-slate-900 mb-2">{label}</p>
+                    <p className="text-emerald-600 text-xs font-black">{`Revenus : ${payload[0].payload.sales} ${payload[0].payload.currency || '€'}`}</p>
+                    <p className="text-rose-500 text-xs font-black mt-1">{`Participants : ${payload[0].payload.attendees}`}</p>
                 </div>
             );
         }
@@ -100,17 +100,17 @@ const Dashboard = () => {
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10">
                 {statCards.map((stat, i) => (
-                    <div key={i} className="bg-white border border-slate-200/70 rounded-[28px] p-6 hover:shadow-[0_14px_40px_-20px_rgba(15,23,42,0.15)] transition-all group relative overflow-hidden">
+                    <div key={i} className="bg-white border border-slate-200/70 rounded-[24px] p-5 hover:shadow-[0_14px_40px_-20px_rgba(15,23,42,0.15)] transition-all group relative overflow-hidden">
                         <div className="absolute -right-4 -top-4 w-32 h-32 bg-white/2 opacity-[0.02] rounded-full group-hover:scale-125 transition-transform duration-500"></div>
-                        <div className="flex justify-between items-start mb-6">
-                            <div className={`${stat.bg} ${stat.color} p-3.5 rounded-2xl`}>
-                                <stat.icon size={22} strokeWidth={2.5} />
+                        <div className="flex justify-between items-start mb-4">
+                            <div className={`${stat.bg} ${stat.color} p-3 rounded-xl`}>
+                                <stat.icon size={19} strokeWidth={2.5} />
                             </div>
-                            <span className="bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-widest py-1 px-3 rounded-full">{stat.change}</span>
+                            <span className="bg-slate-100 text-slate-500 text-[9px] font-black uppercase tracking-wider py-1 px-2.5 rounded-full">{stat.change}</span>
                         </div>
                         <div>
-                            <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">{stat.label}</p>
-                            <h3 className="text-3xl font-black tracking-tighter text-slate-900">{stat.value}</h3>
+                            <p className="text-slate-500 text-[9px] font-bold uppercase tracking-wider mb-1">{stat.label}</p>
+                            <h3 className="text-2xl font-black tracking-tight text-slate-900">{stat.value}</h3>
                         </div>
                     </div>
                 ))}
@@ -118,24 +118,30 @@ const Dashboard = () => {
 
             {/* Charts Area */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2 bg-white border border-slate-200/70 rounded-[32px] p-8 shadow-[0_10px_30px_-20px_rgba(15,23,42,0.15)]">
-                    <div className="flex justify-between items-center mb-10">
+                <div className="lg:col-span-2 bg-white border border-slate-200/70 rounded-[28px] p-6 shadow-[0_10px_30px_-20px_rgba(15,23,42,0.15)]">
+                    <div className="flex justify-between items-center mb-6">
                         <div>
-                            <h3 className="text-xl font-bold tracking-tight">Ventes par Événement</h3>
-                            <p className="text-slate-500 text-sm font-medium">Revenus globaux des tickets vendus</p>
+                            <h3 className="text-lg font-bold tracking-tight">Ventes par événement</h3>
+                            <p className="text-slate-500 text-xs font-medium">Revenus globaux des tickets vendus</p>
                         </div>
                     </div>
                     
-                    <div className="h-72 w-full">
+                    <div className="h-64 w-full">
                         {stats.chartData && stats.chartData.length > 0 ? (
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={stats.chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#ffffff" vertical={false} />
-                                    <XAxis dataKey="name" stroke="#64748b" tick={{ fill: '#64748b', fontSize: 10, fontWeight: 'bold' }} tickLine={false} axisLine={false} />
-                                    <YAxis stroke="#64748b" tick={{ fill: '#64748b', fontSize: 10, fontWeight: 'bold' }} tickLine={false} axisLine={false} />
-                                    <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} />
-                                    <Bar dataKey="sales" fill="#3b82f6" radius={[6, 6, 0, 0]} />
-                                </BarChart>
+                                <ComposedChart data={stats.chartData} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                                    <XAxis dataKey="name" stroke="#94a3b8" tick={{ fill: '#64748b', fontSize: 9, fontWeight: 'bold' }} tickLine={false} axisLine={false} />
+                                    <YAxis yAxisId="revenue" stroke="#94a3b8" tick={{ fill: '#64748b', fontSize: 9, fontWeight: 'bold' }} tickLine={false} axisLine={false} />
+                                    <YAxis yAxisId="attendees" orientation="right" stroke="#fb7185" tick={{ fill: '#fb7185', fontSize: 9, fontWeight: 'bold' }} tickLine={false} axisLine={false} />
+                                    <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f8fafc' }} />
+                                    <Bar yAxisId="revenue" dataKey="sales" radius={[6, 6, 0, 0]}>
+                                        {stats.chartData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6'][index % 5]} />
+                                        ))}
+                                    </Bar>
+                                    <Line yAxisId="attendees" type="monotone" dataKey="attendees" stroke="#f43f5e" strokeWidth={3} dot={{ r: 4, fill: '#f43f5e', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 6 }} />
+                                </ComposedChart>
                             </ResponsiveContainer>
                         ) : (
                             <div className="w-full h-full flex justify-center items-center text-slate-500 text-xs font-bold uppercase tracking-widest">

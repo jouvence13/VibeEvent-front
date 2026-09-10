@@ -76,16 +76,16 @@ const Sidebar = ({ user, isOpen, setIsOpen }) => {
                 aria-hidden="true"
             />
             <aside className={cn(
-                "w-72 h-screen bg-gradient-to-b from-white via-slate-50 to-slate-50 border-r border-slate-200/60 flex flex-col fixed left-0 top-0 z-[60] overflow-y-auto custom-scrollbar transition-transform duration-300 lg:translate-x-0",
+                "w-72 h-screen bg-gradient-to-b from-white via-slate-50 to-slate-50 border-r border-slate-200/60 flex flex-col fixed left-0 top-0 z-[60] overflow-hidden transition-transform duration-300 lg:translate-x-0",
                 isOpen ? "translate-x-0" : "-translate-x-full"
             )}>
-            <div className="p-5 pb-3 flex-shrink-0">
-                <div className="flex items-center gap-2.5 mb-5 cursor-pointer" onClick={() => navigate('/explore')}>
+            <div className="p-5 pb-20 flex-shrink-0">
+                <div className="flex items-center gap-2.5 mb-5 cursor-pointer" onClick={() => navigate('/')}>
                     <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-red-600 to-red-500 shadow-lg shadow-red-500/20"></div>
                     <h2 className="text-slate-900 font-black text-base tracking-tighter uppercase italic">Evenflow</h2>
                 </div>
 
-                <div className="mb-5">
+                <div className="mb-4">
                     <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3 px-2">Participant</p>
                     <nav className="space-y-0.5">
                         {publicMenuItems.map((item) => (
@@ -108,9 +108,9 @@ const Sidebar = ({ user, isOpen, setIsOpen }) => {
                 
                 {(user.role === 'organizer' || user.role === 'admin') && (
                     <>
-                        <div className="w-full h-px bg-gradient-to-r from-transparent via-slate-200/40 to-transparent mb-5"></div>
+                        <div className="w-full h-px bg-gradient-to-r from-transparent via-slate-200/40 to-transparent mb-4"></div>
 
-                        <div className="mb-5">
+                        <div className="mb-4">
                             <div className="flex items-center justify-between px-2 mb-3">
                                 <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Organisateur</p>
                             </div>
@@ -174,7 +174,7 @@ const Sidebar = ({ user, isOpen, setIsOpen }) => {
 
             </div>
 
-            <div className="sticky bottom-0 mt-auto p-5 pt-3 border-t border-slate-200/40 bg-white/95 backdrop-blur-sm">
+            <div className="absolute bottom-0 left-0 w-full p-5 pt-3 border-t border-slate-200/40 bg-slate-50/95 backdrop-blur-sm">
                 <button 
                     onClick={handleLogout}
                     className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-slate-600 hover:text-red-500 hover:bg-red-500/5 transition-colors group"

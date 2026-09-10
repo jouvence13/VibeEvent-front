@@ -21,6 +21,72 @@ const Auth = () => {
         setError('');
     };
 
+    const handleGoogleLogin = async () => {
+        const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+        if (!clientId) {
+            setError('La connexion Google n’est pas configurée.');
+            return;
+        }
+
+        setLoading(true);
+        setError('');
+
+        try {
+            if (!window.google?.accounts?.id) {
+                await new Promise((resolve, reject) => {
+                    const existingScript = document.querySelector('script[data-google-identity]');
+                    if (existingScript) {
+                        existingScript.addEventListener('load', resolve, { once: true });
+                        existingScript.addEventListener('error', reject, { once: true });
+                        return;
+                    }
+
+                    const script = document.createElement('script');
+                    script.src = 'https://accounts.google.com/gsi/client';
+                    script.async = true;
+                    script.defer = true;
+                    script.dataset.googleIdentity = 'true';
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    document.head.appendChild(script);
+                });
+            }
+
+            await new Promise((resolve, reject) => {
+                window.google.accounts.id.initialize({
+                    client_id: clientId,
+                    callback: async ({ credential }) => {
+                        try {
+                            const response = await fetch('http://localhost:5000/api/auth/google', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ credential })
+                            });
+                            const data = await response.json();
+                            if (!response.ok) throw new Error(data.message || 'Connexion Google impossible.');
+
+                            localStorage.setItem('user', JSON.stringify(data));
+                            localStorage.setItem('token', data.token);
+                            navigate(data.role === 'admin' ? '/admin' : data.role === 'organizer' ? '/dashboard' : '/explore');
+                            resolve();
+                        } catch (error) {
+                            reject(error);
+                        }
+                    }
+                });
+                window.google.accounts.id.prompt((notification) => {
+                    if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                        reject(new Error('La fenêtre Google n’a pas pu être ouverte.'));
+                    }
+                });
+            });
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -258,7 +324,7 @@ const Auth = () => {
                         </div>
 
                         <div className="grid grid-cols-2 gap-2">
-                            <button type="button" className="flex items-center justify-center gap-1.5 bg-slate-50 text-slate-900 py-1.5 rounded-2xl border border-slate-200 hover:border-red-200 hover:bg-white hover:shadow-md transition-all group">
+                            <button type="button" onClick={handleGoogleLogin} disabled={loading} className="flex items-center justify-center gap-1.5 bg-slate-50 text-slate-900 py-1.5 rounded-2xl border border-slate-200 hover:border-red-200 hover:bg-white hover:shadow-md transition-all group disabled:cursor-not-allowed disabled:opacity-60">
                                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-red-500 shadow-sm ring-1 ring-red-100">
                                     <Globe size={12} className="group-hover:text-red-700 transition-colors" />
                                 </span>

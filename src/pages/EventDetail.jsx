@@ -138,6 +138,7 @@ const EventDetail = () => {
 
     const totalQuantity = selectedItems.reduce((acc, item) => acc + item.quantity, 0);
     const totalAmount = selectedItems.reduce((acc, item) => acc + (item.quantity * item.unitPrice), 0);
+    const isArchived = event ? new Date(event.date) < new Date() : false;
 
     const handleBuyTicket = async () => {
         if (totalQuantity <= 0) return;
@@ -321,6 +322,22 @@ const EventDetail = () => {
                     </div>
 
                     <aside className="lg:sticky lg:top-3">
+                        {isArchived ? (
+                            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-[0_24px_80px_-50px_rgba(15,23,42,0.55)] sm:p-5">
+                                <div className="flex items-start gap-3">
+                                    <div className="rounded-xl bg-slate-200 p-2 text-slate-500">
+                                        <Calendar size={18} />
+                                    </div>
+                                    <div>
+                                        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Événement archivé</p>
+                                        <h3 className="mt-1 text-base font-black tracking-tight text-slate-900">Vente terminée</h3>
+                                        <p className="mt-2 text-xs leading-relaxed text-slate-500">
+                                            Cet événement est passé. Les billets ne sont plus disponibles à l’achat.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
                         <div className="rounded-2xl border border-slate-200/80 bg-white p-3 shadow-[0_24px_80px_-50px_rgba(15,23,42,0.55)] sm:p-4 lg:p-5">
                             <div className="mb-3 flex items-start justify-between gap-2">
                                 <div>
@@ -428,6 +445,7 @@ const EventDetail = () => {
                                 Sécurisé via FedaPay
                             </p>
                         </div>
+                        )}
                     </aside>
                 </section>
 

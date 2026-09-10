@@ -78,55 +78,55 @@ const Analytics = () => {
         <div className="min-h-screen bg-gradient-to-br from-white via-slate-50 to-slate-100/60">
             {/* Header Premium */}
             <div className="border-b border-slate-200/70 bg-white/80 backdrop-blur-xl">
-                <div className="max-w-7xl mx-auto px-6 sm:px-8 py-10 sm:py-12">
-                    <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500 mb-4">
+                <div className="max-w-7xl mx-auto px-5 sm:px-6 py-7 sm:py-8">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-slate-500 mb-3">
                         Vue analytique
                     </div>
-                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tighter text-slate-900 mb-3">Analyses & Statistiques</h1>
-                    <p className="text-slate-500 font-semibold text-sm sm:text-base">Mesurez l'impact de vos événements en temps réel.</p>
+                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-slate-900 mb-2">Analyses & Statistiques</h1>
+                    <p className="text-slate-500 font-semibold text-xs sm:text-sm">Mesurez l'impact de vos événements en temps réel.</p>
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-6 sm:px-8 py-12 sm:py-16 pb-20">
+            <div className="max-w-7xl mx-auto px-5 sm:px-6 py-8 sm:py-10 pb-12">
                 {/* Stat Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-10">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-7">
                     {statCards.map((card, i) => (
-                        <div key={i} className={`bg-gradient-to-br ${card.bg} border ${card.border} rounded-2xl p-4 sm:p-5 relative overflow-hidden group transition-all hover:shadow-lg hover:shadow-slate-200`}>
+                        <div key={i} className={`bg-gradient-to-br ${card.bg} border ${card.border} rounded-xl p-3.5 sm:p-4 relative overflow-hidden group transition-all hover:shadow-lg hover:shadow-slate-200`}>
                             <div className="absolute -right-6 -top-6 w-24 h-24 bg-gradient-to-br from-white/40 to-white/0 blur-2xl rounded-full transition-all group-hover:scale-150 opacity-0 group-hover:opacity-100"></div>
                             
-                            <div className={`${card.color} w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center mb-3 relative z-10 bg-white shadow-lg shadow-slate-200/50`}>
-                                <card.icon size={18} />
+                            <div className={`${card.color} w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center mb-2.5 relative z-10 bg-white shadow-lg shadow-slate-200/50`}>
+                                <card.icon size={16} />
                             </div>
                             
                             <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1 relative z-10">{card.label}</p>
-                            <h3 className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tighter text-slate-900 leading-none relative z-10">{card.value}</h3>
+                            <h3 className="text-lg sm:text-xl lg:text-2xl font-black tracking-tight text-slate-900 leading-none relative z-10">{card.value}</h3>
                         </div>
                     ))}
                 </div>
 
                 {/* Charts */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
                     {/* Sales Chart */}
-                    <div className="bg-white border border-slate-200/60 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-[0_8px_32px_-8px_rgba(15,23,42,0.1)] hover:shadow-[0_16px_48px_-12px_rgba(15,23,42,0.15)] transition-shadow">
-                        <div className="mb-6 sm:mb-8">
-                            <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight mb-2">Ventes par Événement</h3>
-                            <p className="text-xs sm:text-sm text-slate-500 font-medium">Évolution des revenus au fil du temps</p>
+                    <div className="bg-white border border-slate-200/60 rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-[0_8px_32px_-8px_rgba(15,23,42,0.1)] hover:shadow-[0_16px_48px_-12px_rgba(15,23,42,0.15)] transition-shadow">
+                        <div className="mb-4 sm:mb-5">
+                            <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight mb-1">Ventes par Événement</h3>
+                            <p className="text-[11px] sm:text-xs text-slate-500 font-medium">Évolution des revenus au fil du temps</p>
                         </div>
-                        <div className="h-80 sm:h-96 w-full">
+                        <div className="h-64 sm:h-72 w-full">
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={stats.chartData}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                                     <XAxis 
                                         dataKey="name" 
                                         stroke="#94a3b8" 
-                                        fontSize={12} 
+                                        fontSize={10} 
                                         fontWeight="600" 
                                         tickLine={false} 
                                         axisLine={false}
                                     />
                                     <YAxis 
                                         stroke="#94a3b8" 
-                                        fontSize={12} 
+                                        fontSize={10} 
                                         fontWeight="600" 
                                         tickLine={false} 
                                         axisLine={false}
@@ -156,12 +156,12 @@ const Analytics = () => {
                     </div>
 
                     {/* Attendees Chart */}
-                    <div className="bg-white border border-slate-200/60 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-[0_8px_32px_-8px_rgba(15,23,42,0.1)] hover:shadow-[0_16px_48px_-12px_rgba(15,23,42,0.15)] transition-shadow">
-                        <div className="mb-6 sm:mb-8">
-                            <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight mb-2">Participation (Check-ins)</h3>
-                            <p className="text-xs sm:text-sm text-slate-500 font-medium">Taux de présence à vos événements</p>
+                    <div className="bg-white border border-slate-200/60 rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-[0_8px_32px_-8px_rgba(15,23,42,0.1)] hover:shadow-[0_16px_48px_-12px_rgba(15,23,42,0.15)] transition-shadow">
+                        <div className="mb-4 sm:mb-5">
+                            <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight mb-1">Participation (Check-ins)</h3>
+                            <p className="text-[11px] sm:text-xs text-slate-500 font-medium">Taux de présence à vos événements</p>
                         </div>
-                        <div className="h-80 sm:h-96 w-full">
+                        <div className="h-64 sm:h-72 w-full">
                             <ResponsiveContainer width="100%" height="100%">
                                 <AreaChart data={stats.chartData}>
                                     <defs>
@@ -174,14 +174,14 @@ const Analytics = () => {
                                     <XAxis 
                                         dataKey="name" 
                                         stroke="#94a3b8" 
-                                        fontSize={12} 
+                                        fontSize={10} 
                                         fontWeight="600" 
                                         tickLine={false} 
                                         axisLine={false}
                                     />
                                     <YAxis 
                                         stroke="#94a3b8" 
-                                        fontSize={12} 
+                                        fontSize={10} 
                                         fontWeight="600" 
                                         tickLine={false} 
                                         axisLine={false}

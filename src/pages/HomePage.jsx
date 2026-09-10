@@ -431,62 +431,6 @@ const HomePage = () => {
                             </div>
                         </div>
 
-                        <div className="rounded-[1.75rem] border border-slate-100 bg-white/84 backdrop-blur-xl p-2.5 sm:p-3 lg:p-4 shadow-[0_24px_80px_-56px_rgba(15,23,42,0.35)] overflow-hidden relative">
-                            <div className="absolute -right-16 -top-16 h-32 w-32 rounded-full bg-red-100/70 blur-3xl" />
-                            <div className="relative z-10 grid grid-cols-1 sm:grid-cols-[0.96fr_1.04fr] gap-2.5 items-stretch">
-                                <div className="overflow-hidden rounded-[1.25rem] border border-slate-100 bg-white shadow-sm">
-                                        <img
-                                        src="https://images.unsplash.com/photo-1514525253361-b83f85df0f5c?auto=format&fit=crop&w=1200&q=80"
-                                        alt="Event atmosphere"
-                                        className="w-full h-auto max-h-[9rem] object-cover"
-                                    />
-                                </div>
-                                <div className="grid grid-cols-1 gap-2.5">
-                                    <div className="rounded-[1.25rem] border border-slate-100 bg-linear-to-r from-slate-950 via-slate-900 to-slate-800 text-white p-3.5 shadow-[0_18px_50px_-34px_rgba(15,23,42,0.65)]">
-                                        <div className="text-[10px] uppercase tracking-[0.24em] text-white/55 font-black">Momentum</div>
-                                        <div className="mt-2 overflow-hidden rounded-[0.95rem] border border-white/10">
-                                            <img
-                                                src="https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=800&q=80"
-                                                alt="Momentum visual"
-                                                className="h-16 w-full object-cover"
-                                            />
-                                        </div>
-                                        <div className="mt-1.5 text-lg font-black tracking-tight leading-tight">Une home plus vivante, plus riche, plus premium.</div>
-                                        <p className="mt-1.5 text-[11px] sm:text-xs text-white/70 leading-relaxed">La structure actuelle est conservée, mais densifiée avec des couches visuelles, de meilleurs contrastes et des interactions plus fortes.</p>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-2.5">
-                                        <div className="rounded-[1.1rem] border border-slate-100 bg-white p-2.5 shadow-sm overflow-hidden">
-                                            <div className="h-10 overflow-hidden rounded-[0.8rem]">
-                                                <img src="https://images.unsplash.com/photo-1514525253361-b83f85df0f5c?auto=format&fit=crop&w=500&q=80" alt="Depth visual" className="h-full w-full object-cover" />
-                                            </div>
-                                            <div className="text-[10px] uppercase tracking-[0.22em] text-slate-400 font-black">Depth</div>
-                                            <div className="mt-1 text-sm font-black text-slate-900 leading-tight">Ambient light</div>
-                                        </div>
-                                        <div className="rounded-[1.1rem] border border-slate-100 bg-white p-2.5 shadow-sm overflow-hidden">
-                                            <div className="h-10 overflow-hidden rounded-[0.8rem]">
-                                                <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=500&q=80" alt="Motion visual" className="h-full w-full object-cover" />
-                                            </div>
-                                            <div className="text-[10px] uppercase tracking-[0.22em] text-slate-400 font-black">Motion</div>
-                                            <div className="mt-1 text-sm font-black text-slate-900 leading-tight">Subtle reveal</div>
-                                        </div>
-                                        <div className="rounded-[1.1rem] border border-slate-100 bg-white p-2.5 shadow-sm overflow-hidden">
-                                            <div className="h-10 overflow-hidden rounded-[0.8rem]">
-                                                <img src="https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=500&q=80" alt="Luxury visual" className="h-full w-full object-cover" />
-                                            </div>
-                                            <div className="text-[10px] uppercase tracking-[0.22em] text-slate-400 font-black">Luxury</div>
-                                            <div className="mt-1 text-sm font-black text-slate-900 leading-tight">Glass details</div>
-                                        </div>
-                                        <div className="rounded-[1.1rem] border border-slate-100 bg-white p-2.5 shadow-sm overflow-hidden">
-                                            <div className="h-10 overflow-hidden rounded-[0.8rem]">
-                                                <img src="https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=500&q=80" alt="Rhythm visual" className="h-full w-full object-cover" />
-                                            </div>
-                                            <div className="text-[10px] uppercase tracking-[0.22em] text-slate-400 font-black">Rhythm</div>
-                                            <div className="mt-1 text-sm font-black text-slate-900 leading-tight">Cleaner spacing</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </section>
             </main>

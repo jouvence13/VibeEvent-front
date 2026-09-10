@@ -14,7 +14,8 @@ import {
     Dumbbell,
     PartyPopper,
     Loader2,
-    Settings
+    Settings,
+    Archive
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -44,12 +45,13 @@ const Explore = () => {
     const [newsletterEmail, setNewsletterEmail] = useState('');
     const [subscribed, setSubscribed] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('Tous');
+    const [showArchive, setShowArchive] = useState(false);
 
     // Fetch all events
     useEffect(() => {
         const fetchEvents = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/events');
+                const response = await fetch(`http://localhost:5000/api/events${showArchive ? '?archive=true' : ''}`);
                 const data = await response.json();
                 if (response.ok) {
                     setAllEvents(data);
@@ -62,7 +64,7 @@ const Explore = () => {
             }
         };
         fetchEvents();
-    }, []);
+    }, [showArchive]);
 
     // Filter events by category
     useEffect(() => {
@@ -131,7 +133,8 @@ const Explore = () => {
     return (
         <div className="w-full">
             <main className="pb-20">
-                {/* Hero section */}
+                {/*
+                Hero section
                 <div className="relative w-full min-h-[440px] h-[60vh] lg:h-[70vh] lg:min-h-[560px] px-4 lg:px-12 pt-4 lg:pt-8 mb-8 lg:mb-16 group">
                     <div className="w-full h-full relative rounded-4xl lg:rounded-[48px] overflow-hidden">
                         <img 
@@ -166,6 +169,7 @@ const Explore = () => {
                         </div>
                     </div>
                 </div>
+                */}
 
                 {/* Categories */}
                 <div className="px-8 lg:px-12 mb-12">
@@ -197,6 +201,27 @@ const Explore = () => {
                 </div>
 
                 {/* Events Grid */}
+                <div className="px-8 lg:px-12 mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-red-500">
+                            {showArchive ? 'Historique' : 'À venir'}
+                        </p>
+                        <h2 className="text-2xl font-black tracking-tight text-slate-900">
+                            {showArchive ? 'Archives des événements' : 'Événements à venir'}
+                        </h2>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setSelectedCategory('Tous');
+                            setShowArchive((current) => !current);
+                        }}
+                        className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-black uppercase tracking-[0.12em] text-slate-600 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                    >
+                        <Archive size={15} />
+                        {showArchive ? 'Voir les événements à venir' : 'Voir les archives'}
+                    </button>
+                </div>
                 {loading ? (
                     <div className="flex justify-center items-center py-20">
                         <Loader2 className="animate-spin text-red-500" size={40} />
@@ -312,8 +337,8 @@ const Explore = () => {
                 <div className="px-8 lg:px-12 mt-5">
                     <div className="bg-white border border-slate-200 rounded-[64px] p-8 sm:p-12 lg:p-20 flex flex-col items-start gap-6 relative overflow-hidden">
                             <div className="relative z-10 max-w-3xl text-center md:text-left">
-                                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tighter mb-2 leading-tight">Ne manquez pas la prochaine étape.</h2>
-                                <p className="text-slate-500 text-sm md:text-base font-medium leading-relaxed">Inscrivez-vous pour recevoir des recommandations hebdomadaires.</p>
+                                <h2 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight mb-2 leading-snug">Ne manquez pas la prochaine étape.</h2>
+                                <p className="text-slate-500 text-sm md:text-[15px] font-medium leading-relaxed">Inscrivez-vous pour recevoir des recommandations hebdomadaires.</p>
                             </div>
                             <form onSubmit={handleSubscribe} className="relative z-10 flex flex-col sm:flex-row w-full md:w-auto gap-3 mt-1">
                                 <input 
