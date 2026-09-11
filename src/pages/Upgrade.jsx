@@ -3,6 +3,7 @@ import { Calendar, BarChart2, Star, Check, Loader2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useToast } from '../components/Toast';
 import { loadFedaPayCheckout } from '../lib/fedapayCheckout';
+import { API_BASE_URL } from '../lib/api';
 
 const Upgrade = () => {
     const { showToast } = useToast();
@@ -37,7 +38,7 @@ const Upgrade = () => {
             const token = localStorage.getItem('token');
             const checkoutScriptPromise = loadFedaPayCheckout();
 
-            const response = await fetch('http://localhost:5000/api/auth/upgrade-request', {
+            const response = await fetch(`${API_BASE_URL}/api/auth/upgrade-request`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -62,7 +63,7 @@ const Upgrade = () => {
                 onComplete: async (_reason, transaction) => {
                     if (transaction?.status === 'approved') {
                         try {
-                            const confirmRes = await fetch('http://localhost:5000/api/auth/confirm-upgrade', {
+                            const confirmRes = await fetch(`${API_BASE_URL}/api/auth/confirm-upgrade`, {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Mail, Clock, ChevronRight, ChevronLeft, UserCircle, Search, Loader2 } from 'lucide-react';
+import { API_BASE_URL } from '../lib/api';
 
 const AttendeeList = () => {
     const [events, setEvents] = useState([]);
@@ -17,7 +18,7 @@ const AttendeeList = () => {
         const fetchEvents = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch('http://localhost:5000/api/events/my-events', {
+                const response = await fetch(`${API_BASE_URL}/api/events/my-events`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const data = await response.json();
@@ -50,7 +51,7 @@ const AttendeeList = () => {
         if (window.innerWidth < 640) setMobileOpen(true);
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:5000/api/tickets/event/${eventId}/attendees`, {
+            const response = await fetch(`${API_BASE_URL}/api/tickets/event/${eventId}/attendees`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 import { Scan, LogIn, LogOut, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { API_BASE_URL } from '../lib/api';
 
 const EventScanner = () => {
     const [scanMode, setScanMode] = useState('in'); // 'in' ou 'out'
@@ -43,7 +44,7 @@ const EventScanner = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/tickets/scan', {
+            const response = await fetch(`${API_BASE_URL}/api/tickets/scan`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

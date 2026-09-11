@@ -11,6 +11,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { ComposedChart, Bar, Line, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { formatRevenueByCurrency } from '../lib/utils';
+import { API_BASE_URL } from '../lib/api';
 
 const Dashboard = () => {
     const navigate = useNavigate();
@@ -27,7 +28,7 @@ const Dashboard = () => {
                 navigate('/');
                 return;
             }
-            const response = await fetch('http://localhost:5000/api/events/stats', {
+            const response = await fetch(`${API_BASE_URL}/api/events/stats`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();

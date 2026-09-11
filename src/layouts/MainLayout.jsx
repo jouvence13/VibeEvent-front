@@ -3,6 +3,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
 import { Search, Bell, Loader2, Menu, X } from 'lucide-react';
+import { API_BASE_URL } from '../lib/api';
 
 const MainLayout = () => {
     const navigate = useNavigate();
@@ -16,7 +17,7 @@ const MainLayout = () => {
                 const token = localStorage.getItem('token');
                 if (!token) return;
 
-                const response = await fetch('http://localhost:5000/api/auth/me', {
+                const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 

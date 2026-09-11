@@ -13,6 +13,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { useToast } from '../components/Toast';
 import { loadFedaPayCheckout } from '../lib/fedapayCheckout';
+import { API_BASE_URL } from '../lib/api';
 
 const EventDetail = () => {
     const { id } = useParams();
@@ -93,7 +94,7 @@ const EventDetail = () => {
     useEffect(() => {
         const fetchEvent = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/api/events/${id}`);
+                const response = await fetch(`${API_BASE_URL}/api/events/${id}`);
                 const data = await response.json();
                 if (response.ok) {
                     setEvent(data);
@@ -154,7 +155,7 @@ const EventDetail = () => {
             // Run script loading and transaction creation in parallel for faster checkout opening.
             const checkoutScriptPromise = loadFedaPayCheckout();
 
-            const response = await fetch('http://localhost:5000/api/tickets/buy', {
+            const response = await fetch(`${API_BASE_URL}/api/tickets/buy`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

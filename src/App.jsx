@@ -17,6 +17,7 @@ import PollManager from './pages/PollManager';
 import Upgrade from './pages/Upgrade';
 import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentFailure from './pages/PaymentFailure';
+import NotFound from './pages/NotFound';
 import './App.css';
 import { ToastProvider } from './components/Toast';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -57,6 +58,9 @@ function App() {
           {/* Admin-only content */}
           <Route path="/admin" element={<ProtectedRoute roles={['admin']}><AdminDashboard /></ProtectedRoute>} />
         </Route>
+
+        {/* 404 Not Found Catch-All */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </ToastProvider>
   );

@@ -11,6 +11,7 @@ import {
     AlertCircle,
     CheckCircle2
 } from 'lucide-react';
+import { API_BASE_URL } from '../lib/api';
 
 const PollManager = () => {
     const [polls, setPolls] = useState([]);
@@ -32,8 +33,8 @@ const PollManager = () => {
         try {
             const token = localStorage.getItem('token');
             const [pollsRes, eventsRes] = await Promise.all([
-                fetch('http://localhost:5000/api/polls/my-polls', { headers: { 'Authorization': `Bearer ${token}` } }),
-                fetch('http://localhost:5000/api/events/my-events', { headers: { 'Authorization': `Bearer ${token}` } })
+                fetch(`${API_BASE_URL}/api/polls/my-polls`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch(`${API_BASE_URL}/api/events/my-events`, { headers: { 'Authorization': `Bearer ${token}` } })
             ]);
 
             if (pollsRes.ok) setPolls(await pollsRes.json());
@@ -53,7 +54,7 @@ const PollManager = () => {
         e.preventDefault();
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/polls', {
+            const response = await fetch(`${API_BASE_URL}/api/polls`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -78,7 +79,7 @@ const PollManager = () => {
     const handleClosePoll = async (pollId) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:5000/api/polls/${pollId}/close`, {
+            const response = await fetch(`${API_BASE_URL}/api/polls/${pollId}/close`, {
                 method: 'PATCH',
                 headers: { 'Authorization': `Bearer ${token}` }
             });

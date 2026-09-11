@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Calendar, MapPin, Tag, DollarSign, Users, Image as ImageIcon, Sparkles, Loader2, CheckCircle2, Ticket, Globe } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useToast } from '../components/Toast';
+import { API_BASE_URL } from '../lib/api';
 
 const CreateEvent = () => {
     const navigate = useNavigate();
@@ -36,7 +37,7 @@ const CreateEvent = () => {
         if (isEditing) {
             const fetchEvent = async () => {
                 try {
-                    const response = await fetch(`http://localhost:5000/api/events/${id}`);
+                    const response = await fetch(`${API_BASE_URL}/api/events/${id}`);
                     const data = await response.json();
                     if (response.ok) {
                         // Convert date to datetime-local format
@@ -158,8 +159,8 @@ const CreateEvent = () => {
             // Si on édite, on fait un PUT, sinon un POST
             const method = isEditing ? 'PUT' : 'POST';
             const url = isEditing 
-                ? `http://localhost:5000/api/events/${id}` 
-                : 'http://localhost:5000/api/events';
+                ? `${API_BASE_URL}/api/events/${id}` 
+                : `${API_BASE_URL}/api/events`;
             
             const response = await fetch(url, {
                 method,

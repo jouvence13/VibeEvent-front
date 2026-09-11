@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { CheckCircle2, Loader2, Ticket, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { API_BASE_URL } from '../lib/api';
 
 const PaymentSuccess = () => {
     const navigate = useNavigate();
@@ -20,7 +21,7 @@ const PaymentSuccess = () => {
                 }
 
                 const token = localStorage.getItem('token');
-                const response = await fetch('http://localhost:5000/api/tickets/confirm-payment', {
+                const response = await fetch(`${API_BASE_URL}/api/tickets/confirm-payment`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

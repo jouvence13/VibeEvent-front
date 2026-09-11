@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Ticket as TicketIcon, Clock, MapPin, AlertCircle, RefreshCw } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { API_BASE_URL } from '../lib/api';
 
 const TicketWallet = () => {
     const [tickets, setTickets] = useState([]);
@@ -19,7 +20,7 @@ const TicketWallet = () => {
         setTicketsError(false);
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/tickets/my-tickets', {
+            const response = await fetch(`${API_BASE_URL}/api/tickets/my-tickets`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -58,7 +59,7 @@ const TicketWallet = () => {
         const generateQR = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`http://localhost:5000/api/tickets/${selectedTicket._id}/qr`, {
+                const response = await fetch(`${API_BASE_URL}/api/tickets/${selectedTicket._id}/qr`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const data = await response.json();

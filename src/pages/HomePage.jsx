@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
 import { motion } from 'framer-motion';
 import Auth from './Auth';
+import { API_BASE_URL } from '../lib/api';
 
 const Nav = ({ navigate, isAuthenticated, onLogin }) => (
     <motion.header
@@ -141,7 +142,7 @@ const HomePage = () => {
     useEffect(() => {
         const fetchEvents = async () => {
             try {
-                const res = await fetch('http://localhost:5000/api/events');
+                const res = await fetch(`${API_BASE_URL}/api/events`);
                 const data = await res.json();
                 if (res.ok && Array.isArray(data)) setEvents(data.slice(0, 6));
             } catch (err) {

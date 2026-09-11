@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, ShieldCheck, Mail, Lock, Globe, Apple as AppleIcon, Eye, EyeOff, X } from 'lucide-react';
 import { cn } from '../lib/utils';
-
+import { API_BASE_URL } from '../lib/api';
 
 const Auth = ({ embedded = false, onClose }) => {
     const navigate = useNavigate();
@@ -15,16 +15,109 @@ const Auth = ({ embedded = false, onClose }) => {
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [googleClientId, setGoogleClientId] = useState('');
+    const googleButtonRef = useRef(null);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
         setError('');
     };
 
+    const handleGoogleCallback = async (response) => {
+        setLoading(true);
+        setError('');
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/auth/google`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ credential: response.credential })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Connexion Google impossible.');
+
+            localStorage.setItem('user', JSON.stringify(data));
+            localStorage.setItem('token', data.token);
+            navigate(data.role === 'admin' ? '/admin' : data.role === 'organizer' ? '/dashboard' : '/explore');
+        } catch (err) {
+            setError(err.message || 'Erreur lors de la connexion Google');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const setupGoogle = async () => {
+            let clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+            if (!clientId) {
+                try {
+                    const res = await fetch(`${API_BASE_URL}/api/auth/config`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        clientId = data.googleClientId;
+                    }
+                } catch (e) {
+                    console.warn('Configuration Google non récupérée du backend:', e);
+                }
+            }
+
+            if (!clientId || !isMounted) return;
+            setGoogleClientId(clientId);
+
+            const initializeGoogle = () => {
+                if (window.google?.accounts?.id && isMounted) {
+                    window.google.accounts.id.initialize({
+                        client_id: clientId,
+                        callback: handleGoogleCallback,
+                        auto_select: false,
+                        cancel_on_tap_outside: true,
+                    });
+
+                    if (googleButtonRef.current) {
+                        googleButtonRef.current.innerHTML = '';
+                        window.google.accounts.id.renderButton(googleButtonRef.current, {
+                            type: 'standard',
+                            theme: 'outline',
+                            size: 'medium',
+                            text: 'signin_with',
+                            shape: 'pill',
+                            width: '100%'
+                        });
+                    }
+                }
+            };
+
+            if (window.google?.accounts?.id) {
+                initializeGoogle();
+            } else {
+                const existingScript = document.querySelector('script[data-google-identity]');
+                if (existingScript) {
+                    existingScript.addEventListener('load', initializeGoogle, { once: true });
+                } else {
+                    const script = document.createElement('script');
+                    script.src = 'https://accounts.google.com/gsi/client';
+                    script.async = true;
+                    script.defer = true;
+                    script.dataset.googleIdentity = 'true';
+                    script.onload = initializeGoogle;
+                    document.head.appendChild(script);
+                }
+            }
+        };
+
+        setupGoogle();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [isLogin]);
+
     const handleGoogleLogin = async () => {
-        const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+        const clientId = googleClientId || import.meta.env.VITE_GOOGLE_CLIENT_ID;
         if (!clientId) {
-            setError('La connexion Google n’est pas configurée.');
+            setError('La connexion Google n’est pas configurée dans le backend.');
             return;
         }
 
@@ -32,57 +125,24 @@ const Auth = ({ embedded = false, onClose }) => {
         setError('');
 
         try {
-            if (!window.google?.accounts?.id) {
-                await new Promise((resolve, reject) => {
-                    const existingScript = document.querySelector('script[data-google-identity]');
-                    if (existingScript) {
-                        existingScript.addEventListener('load', resolve, { once: true });
-                        existingScript.addEventListener('error', reject, { once: true });
-                        return;
-                    }
-
-                    const script = document.createElement('script');
-                    script.src = 'https://accounts.google.com/gsi/client';
-                    script.async = true;
-                    script.defer = true;
-                    script.dataset.googleIdentity = 'true';
-                    script.onload = resolve;
-                    script.onerror = reject;
-                    document.head.appendChild(script);
-                });
-            }
-
-            await new Promise((resolve, reject) => {
-                window.google.accounts.id.initialize({
-                    client_id: clientId,
-                    callback: async ({ credential }) => {
-                        try {
-                            const response = await fetch('http://localhost:5000/api/auth/google', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ credential })
-                            });
-                            const data = await response.json();
-                            if (!response.ok) throw new Error(data.message || 'Connexion Google impossible.');
-
-                            localStorage.setItem('user', JSON.stringify(data));
-                            localStorage.setItem('token', data.token);
-                            navigate(data.role === 'admin' ? '/admin' : data.role === 'organizer' ? '/dashboard' : '/explore');
-                            resolve();
-                        } catch (error) {
-                            reject(error);
+            if (window.google?.accounts?.id) {
+                const gBtn = googleButtonRef.current?.querySelector('div[role="button"]');
+                if (gBtn) {
+                    gBtn.click();
+                } else {
+                    window.google.accounts.id.prompt((notification) => {
+                        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                            setError('Veuillez autoriser les popups ou vérifier les origines Google OAuth.');
+                            setLoading(false);
                         }
-                    }
-                });
-                window.google.accounts.id.prompt((notification) => {
-                    if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-                        reject(new Error('La fenêtre Google n’a pas pu être ouverte.'));
-                    }
-                });
-            });
+                    });
+                }
+            } else {
+                setError('Chargement du service Google en cours, réessayez dans 2 secondes...');
+                setLoading(false);
+            }
         } catch (err) {
-            setError(err.message);
-        } finally {
+            setError(err.message || 'Erreur Google Sign-In');
             setLoading(false);
         }
     };
@@ -98,7 +158,7 @@ const Auth = ({ embedded = false, onClose }) => {
             : { ...formData, role: 'attendee' };
 
         try {
-            const response = await fetch(`http://localhost:5000${endpoint}`, {
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -342,6 +402,7 @@ const Auth = ({ embedded = false, onClose }) => {
                         </div>
 
                         <div className="grid grid-cols-2 gap-2">
+                            <div ref={googleButtonRef} className="hidden" />
                             <button type="button" onClick={handleGoogleLogin} disabled={loading} className="flex items-center justify-center gap-1.5 bg-slate-50 text-slate-900 py-1.5 rounded-2xl border border-slate-200 hover:border-red-200 hover:bg-white hover:shadow-md transition-all group disabled:cursor-not-allowed disabled:opacity-60">
                                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-red-500 shadow-sm ring-1 ring-red-100">
                                     <Globe size={12} className="group-hover:text-red-700 transition-colors" />

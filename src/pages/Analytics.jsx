@@ -12,6 +12,7 @@ import {
 } from 'recharts';
 import { TrendingUp, Users, Ticket, DollarSign, Loader2, AlertCircle } from 'lucide-react';
 import { formatRevenueByCurrency } from '../lib/utils';
+import { API_BASE_URL } from '../lib/api';
 
 const Analytics = () => {
     const [stats, setStats] = useState(null);
@@ -23,7 +24,7 @@ const Analytics = () => {
         setError(false);
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/events/stats', {
+            const response = await fetch(`${API_BASE_URL}/api/events/stats`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();

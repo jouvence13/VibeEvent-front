@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Calendar, MapPin, Trash2, Edit3, Eye, Loader2, Plus, MoreHorizontal } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../components/Toast';
+import { API_BASE_URL } from '../lib/api';
 
 const EventsManagement = () => {
     const navigate = useNavigate();
@@ -15,7 +16,7 @@ const EventsManagement = () => {
         setError(false);
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/events/my-events', {
+            const response = await fetch(`${API_BASE_URL}/api/events/my-events`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -41,7 +42,7 @@ const EventsManagement = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:5000/api/events/${eventId}`, {
+            const response = await fetch(`${API_BASE_URL}/api/events/${eventId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });

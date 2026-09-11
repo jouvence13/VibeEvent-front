@@ -4,6 +4,7 @@ import { User, Mail, Shield, Building, ArrowUpCircle, CheckCircle2, AlertCircle,
 import { cn } from '../lib/utils';
 import Modal from '../components/Modal';
 import { useToast } from '../components/Toast';
+import { API_BASE_URL } from '../lib/api';
 
 const Profile = () => {
     const navigate = useNavigate();
@@ -19,7 +20,7 @@ const Profile = () => {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/organizations', {
+            const response = await fetch(`${API_BASE_URL}/api/organizations`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

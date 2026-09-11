@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ShieldCheck, Building2, UserCircle, CheckCircle, XCircle, Loader2, ListTree, MoreVertical, Calendar, AlertTriangle } from 'lucide-react';
 import Modal from '../components/Modal';
 import { useToast } from '../components/Toast';
+import { API_BASE_URL } from '../lib/api';
 
 const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState('requests'); // 'requests', 'users', 'organizations'
@@ -30,28 +31,28 @@ const AdminDashboard = () => {
 
         try {
             // Fetch Requests
-            const reqRes = await fetch('http://localhost:5000/api/auth/pending-upgrades', { headers });
+            const reqRes = await fetch(`${API_BASE_URL}/api/auth/pending-upgrades`, { headers });
             if (reqRes.ok) setRequests(await reqRes.json());
             else failures.push('demandes');
         } catch (e) { console.error("Error fetching requests", e); failures.push('demandes'); }
 
         try {
             // Fetch Stats
-            const statsRes = await fetch('http://localhost:5000/api/admin/stats', { headers });
+            const statsRes = await fetch(`${API_BASE_URL}/api/admin/stats`, { headers });
             if (statsRes.ok) setStats(await statsRes.json());
             else failures.push('statistiques');
         } catch (e) { console.error("Error fetching stats", e); failures.push('statistiques'); }
 
         try {
             // Fetch Users
-            const usersRes = await fetch('http://localhost:5000/api/admin/users', { headers });
+            const usersRes = await fetch(`${API_BASE_URL}/api/admin/users`, { headers });
             if (usersRes.ok) setUsers(await usersRes.json());
             else failures.push('utilisateurs');
         } catch (e) { console.error("Error fetching users", e); failures.push('utilisateurs'); }
 
         try {
             // Fetch Organizations
-            const orgsRes = await fetch('http://localhost:5000/api/admin/organizations', { headers });
+            const orgsRes = await fetch(`${API_BASE_URL}/api/admin/organizations`, { headers });
             if (orgsRes.ok) {
                 setOrganizations(await orgsRes.json());
             } else {
@@ -81,7 +82,7 @@ const AdminDashboard = () => {
         setIsSubmitting(true);
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/auth/handle-upgrade', {
+            const response = await fetch(`${API_BASE_URL}/api/auth/handle-upgrade`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -113,8 +114,8 @@ const AdminDashboard = () => {
         try {
             const token = localStorage.getItem('token');
             const url = type === 'role' 
-                ? `http://localhost:5000/api/admin/users/${userId}/role`
-                : `http://localhost:5000/api/admin/users/${userId}/status`;
+                ? `${API_BASE_URL}/api/admin/users/${userId}/role`
+                : `${API_BASE_URL}/api/admin/users/${userId}/status`;
                 
             const response = await fetch(url, {
                 method: 'PUT',

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Vote, Users, TrendingUp, CheckCircle2, Loader2, Sparkles, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../components/Toast';
+import { API_BASE_URL } from '../lib/api';
 
 const Voting = () => {
     const navigate = useNavigate();
@@ -23,7 +24,7 @@ const Voting = () => {
             }
 
             // 1. Fetch user's tickets to know which events they can vote for
-            const ticketRes = await fetch('http://localhost:5000/api/tickets/my-tickets', {
+            const ticketRes = await fetch(`${API_BASE_URL}/api/tickets/my-tickets`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const tickets = await ticketRes.json();
@@ -34,7 +35,7 @@ const Voting = () => {
             const eventIds = [...new Set(tickets.filter(t => t.event).map(t => t.event._id))];
             
             const pollPromises = eventIds.map(id => 
-                fetch(`http://localhost:5000/api/polls/event/${id}`, {
+                fetch(`${API_BASE_URL}/api/polls/event/${id}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 }).then(res => res.json())
             );
@@ -57,7 +58,7 @@ const Voting = () => {
     const handleVote = async (pollId, optionId) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/polls/vote', {
+            const response = await fetch(`${API_BASE_URL}/api/polls/vote`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',

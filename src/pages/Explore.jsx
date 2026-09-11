@@ -18,6 +18,7 @@ import {
     Archive
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../lib/api';
 
 const categoryMap = {
     'Tous': null,
@@ -51,7 +52,7 @@ const Explore = () => {
     useEffect(() => {
         const fetchEvents = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/api/events${showArchive ? '?archive=true' : ''}`);
+                const response = await fetch(`${API_BASE_URL}/api/events${showArchive ? '?archive=true' : ''}`);
                 const data = await response.json();
                 if (response.ok) {
                     setAllEvents(data);
@@ -106,7 +107,7 @@ const Explore = () => {
                 navigate('/');
                 return;
             }
-            const response = await fetch(`http://localhost:5000/api/events/${eventId}/hype`, {
+            const response = await fetch(`${API_BASE_URL}/api/events/${eventId}/hype`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
