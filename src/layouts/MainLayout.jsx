@@ -37,7 +37,7 @@ const MainLayout = () => {
                 } else if (response.status === 401) {
                     localStorage.removeItem('token');
                     localStorage.removeItem('user');
-                    navigate('/auth');
+                    navigate('/');
                 }
             } catch (err) {
                 console.error("Sync error:", err);

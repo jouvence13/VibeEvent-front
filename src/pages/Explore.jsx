@@ -103,7 +103,7 @@ const Explore = () => {
         try {
             const token = localStorage.getItem('token');
             if(!token) {
-                navigate('/auth');
+                navigate('/');
                 return;
             }
             const response = await fetch(`http://localhost:5000/api/events/${eventId}/hype`, {
@@ -271,7 +271,7 @@ const Explore = () => {
                                         <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-3 text-white">
                                             <div className="min-w-0">
                                                 <p className="text-[10px] font-black uppercase tracking-[0.22em] text-white/70">
-                                                    {event.organization?.name || 'Evenflow'}
+                                                    {event.organization?.name || 'EventChill'}
                                                 </p>
                                                 <h3 className="mt-2 line-clamp-2 text-xl font-black tracking-tight leading-none drop-shadow-lg">
                                                     {event.title}
@@ -311,7 +311,7 @@ const Explore = () => {
                                         <div className="mt-4 flex items-center justify-between gap-3">
                                             <div className="min-w-0">
                                                 <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Organisateur</p>
-                                                <p className="truncate text-sm font-bold text-slate-900">{event.organization?.name || 'Evenflow'}</p>
+                                                <p className="truncate text-sm font-bold text-slate-900">{event.organization?.name || 'EventChill'}</p>
                                             </div>
 
                                             <div className="flex items-center gap-2 rounded-full bg-red-500/10 px-3 py-2 text-red-600">

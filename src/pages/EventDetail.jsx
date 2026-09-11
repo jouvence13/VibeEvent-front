@@ -147,7 +147,7 @@ const EventDetail = () => {
         try {
             const token = localStorage.getItem('token');
             if (!token) {
-                navigate('/auth');
+                navigate('/');
                 return;
             }
 
@@ -472,7 +472,7 @@ const EventDetail = () => {
                                         <div className="min-w-0">
                                             <h4 className="truncate text-sm font-black text-slate-900 sm:text-base">{event.location}</h4>
                                             <p className="text-[9px] font-black uppercase tracking-[0.18em] text-slate-500">
-                                                {event.organization?.name || 'Evenflow'}
+                                                {event.organization?.name || 'EventChill'}
                                             </p>
                                         </div>
                                         {event.googleMapsLink && (
@@ -516,7 +516,7 @@ const EventDetail = () => {
                             </div>
                             <div className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
                                 <span className="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400">Organisateur</span>
-                                <span className="text-xs font-bold text-slate-900 text-right truncate">{event.organization?.name || 'Evenflow'}</span>
+                                <span className="text-xs font-bold text-slate-900 text-right truncate">{event.organization?.name || 'EventChill'}</span>
                             </div>
                         </div>
                     </div>

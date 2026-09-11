@@ -24,7 +24,7 @@ const Dashboard = () => {
         try {
             const token = localStorage.getItem('token');
             if (!token) {
-                navigate('/auth');
+                navigate('/');
                 return;
             }
             const response = await fetch('http://localhost:5000/api/events/stats', {

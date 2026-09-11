@@ -18,7 +18,7 @@ const Voting = () => {
         try {
             const token = localStorage.getItem('token');
             if(!token) {
-                navigate('/auth');
+                navigate('/');
                 return;
             }
 

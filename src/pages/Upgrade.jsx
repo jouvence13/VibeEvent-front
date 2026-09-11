@@ -120,7 +120,7 @@ const Upgrade = () => {
             name: 'Suite Complète',
             icon: <Star size={32} className="text-red-500" />,
             price: 20,
-            description: 'L\'expérience ultime pour tout gérer sur Evenflow.',
+            description: 'L\'expérience ultime pour tout gérer sur EventChill.',
             features: ['Toutes les fonctionnalités Événements', 'Toutes les fonctionnalités Sondages', 'Support prioritaire 24/7', 'Analyses avancées'],
             color: 'red',
             popular: true

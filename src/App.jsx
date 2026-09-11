@@ -1,5 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
-import Auth from './pages/Auth';
+import { Routes, Route } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import Voting from './pages/Voting';
 import HomePage from './pages/HomePage';
@@ -28,10 +27,6 @@ function App() {
   return (
     <ToastProvider>
       <Routes>
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/login" element={<Navigate to="/auth" replace />} />
-        <Route path="/register" element={<Navigate to="/auth" replace />} />
-
         {/* Public routes */}
         <Route path="/" element={<HomePage />} />
 

@@ -144,7 +144,7 @@ const AdminDashboard = () => {
                     <ShieldCheck className="text-red-500" size={32} />
                     <h1 className="text-4xl font-black tracking-tighter">Terminal Administration</h1>
                 </div>
-                <p className="text-slate-500 font-medium">Contrôle global de la plateforme Evenflow.</p>
+                <p className="text-slate-500 font-medium">Contrôle global de la plateforme EventChill.</p>
             </div>
 
             {failedResources.length > 0 && (

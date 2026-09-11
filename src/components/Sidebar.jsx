@@ -60,7 +60,7 @@ const Sidebar = ({ user, isOpen, setIsOpen }) => {
     const handleLogout = () => {
         localStorage.removeItem('user');
         localStorage.removeItem('token');
-        navigate('/auth');
+        navigate('/');
     };
 
     return (
@@ -82,7 +82,7 @@ const Sidebar = ({ user, isOpen, setIsOpen }) => {
             <div className="p-5 pb-20 flex-shrink-0">
                 <div className="flex items-center gap-2.5 mb-5 cursor-pointer" onClick={() => navigate('/')}>
                     <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-red-600 to-red-500 shadow-lg shadow-red-500/20"></div>
-                    <h2 className="text-slate-900 font-black text-base tracking-tighter uppercase italic">Evenflow</h2>
+                    <h2 className="text-slate-900 font-black text-base tracking-tighter uppercase italic">EventChill</h2>
                 </div>
 
                 <div className="mb-4">

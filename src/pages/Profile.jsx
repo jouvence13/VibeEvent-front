@@ -52,7 +52,7 @@ const Profile = () => {
                     Profil
                 </div>
                 <h1 className="text-3xl sm:text-4xl font-black tracking-tighter mb-2 text-slate-900">Mon Profil</h1>
-                <p className="text-slate-500 font-medium">Gérez votre identité et vos accès sur Evenflow.</p>
+                <p className="text-slate-500 font-medium">Gérez votre identité et vos accès sur EventChill.</p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10">

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, ShieldCheck, Mail, Lock, Globe, Apple as AppleIcon, Eye, EyeOff } from 'lucide-react';
+import { User, ShieldCheck, Mail, Lock, Globe, Apple as AppleIcon, Eye, EyeOff, X } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 
-const Auth = () => {
+const Auth = ({ embedded = false, onClose }) => {
     const navigate = useNavigate();
     const [isLogin, setIsLogin] = useState(true);
     const [showPassword, setShowPassword] = useState(false);
@@ -136,9 +136,17 @@ const Auth = () => {
 
 
     return (
-        <div className="min-h-screen lg:h-screen lg:overflow-hidden bg-white flex flex-col lg:flex-row font-['Inter'] selection:bg-red-500/30">
+        <div className={cn(
+            "font-['Inter'] selection:bg-red-500/30",
+            embedded
+                ? "fixed inset-0 z-[110] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md"
+                : "min-h-screen lg:h-screen lg:overflow-hidden bg-white flex flex-col lg:flex-row"
+        )}>
             {/* Left Side - Visual */}
-            <div className="hidden lg:flex lg:w-5/12 relative overflow-hidden bg-red-600 items-center justify-center p-8 xl:p-10 border-r border-red-200">
+            <div className={cn(
+                "relative overflow-hidden bg-red-600 items-center justify-center p-8 xl:p-10 border-r border-red-200",
+                embedded ? "hidden" : "hidden lg:flex lg:w-5/12"
+            )}>
                 {/* Background Party Image with Overlay */}
                 <div className="absolute inset-0">
                     <img 
@@ -159,7 +167,7 @@ const Auth = () => {
                     <div className="rounded-[28px] border border-white/15 bg-black/20 p-5 xl:p-6 backdrop-blur-xl shadow-[0_24px_80px_rgba(15,23,42,0.18)]">
                         <div className="mb-6 flex items-center gap-2">
                             <div className="h-7 w-7 rounded-lg bg-linear-to-tr from-red-500 via-red-400 to-orange-300 shadow-lg shadow-red-500/25"></div>
-                            <h2 className="text-white font-black text-xl xl:text-2xl tracking-tighter">evenflow</h2>
+                            <h2 className="text-white font-black text-xl xl:text-2xl tracking-tighter">eventchill</h2>
                         </div>
 
                         <h1 className="text-white text-4xl xl:text-[3.4rem] font-black leading-[0.94] mb-4 tracking-tighter max-w-[11ch]">
@@ -187,10 +195,20 @@ const Auth = () => {
             </div>
 
             {/* Right Side - Form Container */}
-            <div className="flex-1 flex items-center justify-center px-4 py-4 lg:px-8 xl:px-10 relative bg-linear-to-b from-white via-white to-red-50/25">
+            <div className={cn(
+                "flex items-center justify-center relative",
+                embedded
+                    ? "w-full max-w-md bg-transparent p-0"
+                    : "flex-1 px-4 py-4 lg:px-8 xl:px-10 bg-linear-to-b from-white via-white to-red-50/25"
+            )}>
                 <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_50%_40%,rgba(239,68,68,0.07),transparent_45%)]"></div>
                 <div className="w-full max-w-85 xl:max-w-95 relative z-10">
-                    <div className="overflow-hidden rounded-[30px] border border-black/5 bg-white/95 backdrop-blur-xl shadow-[0_24px_80px_rgba(15,23,42,0.10)]">
+                    <div className="relative overflow-hidden rounded-[30px] border border-black/5 bg-white/95 backdrop-blur-xl shadow-[0_24px_80px_rgba(15,23,42,0.10)]">
+                        {embedded && onClose && (
+                            <button type="button" onClick={onClose} className="absolute right-4 top-4 z-10 rounded-xl p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900" aria-label="Fermer">
+                                <X size={18} />
+                            </button>
+                        )}
                         <div className="h-1 w-full bg-linear-to-r from-red-700 via-red-500 to-red-700"></div>
                         <div className="p-4 lg:p-5 xl:p-6">
                             <div className="mb-3 flex items-start justify-between gap-3">

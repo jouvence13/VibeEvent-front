@@ -3,8 +3,9 @@ import { ChevronRight, Loader2, ArrowRight, Search, ShieldCheck, Ticket, Users, 
 import { useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
 import { motion } from 'framer-motion';
+import Auth from './Auth';
 
-const Nav = ({ navigate, isAuthenticated }) => (
+const Nav = ({ navigate, isAuthenticated, onLogin }) => (
     <motion.header
         initial={{ y: -16, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -16,13 +17,13 @@ const Nav = ({ navigate, isAuthenticated }) => (
                 <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.22),rgba(255,255,255,0)_45%)] pointer-events-none" />
                 <button className="relative z-10 flex items-center gap-3 cursor-pointer" onClick={() => navigate('/') }>
                     <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-linear-to-tr from-red-700 via-red-600 to-red-500 shadow-[0_12px_28px_-10px_rgba(220,38,38,0.65)]" />
-                    <span className="text-slate-900 font-extrabold tracking-tight">Evenflow</span>
+                    <span className="text-slate-900 font-extrabold tracking-tight">EventChill</span>
                 </button>
                 <div className="relative z-10 flex items-center gap-4 shrink-0">
                     {isAuthenticated ? (
                         <button onClick={() => navigate('/explore')} className="text-sm text-slate-900/90 hover:text-slate-900 font-semibold">Explorer</button>
                     ) : (
-                        <button onClick={() => navigate('/auth')} className="text-sm text-slate-900/90 hover:text-slate-900 font-semibold">Se connecter</button>
+                        <button onClick={onLogin} className="text-sm text-slate-900/90 hover:text-slate-900 font-semibold">Se connecter</button>
                     )}
                 </div>
             </div>
@@ -74,7 +75,7 @@ const Card = ({ ev, onOpen }) => (
                 <h3 className="font-extrabold text-[1.05rem] text-slate-900 truncate">{ev.title}</h3>
                 <div className="flex items-center gap-1 text-amber-400 text-[11px]"><Star size={12} className="fill-current" /><Star size={12} className="fill-current" /><Star size={12} className="fill-current" /><Star size={12} className="fill-current" /><Star size={12} className="fill-current" /></div>
             </div>
-            <p className="text-sm text-slate-600 mt-1">{ev.organization?.name || 'Evenflow'}</p>
+            <p className="text-sm text-slate-600 mt-1">{ev.organization?.name || 'EventChill'}</p>
             <div className="mt-4 grid grid-cols-[1fr_auto] gap-3 items-end">
                 <div className="space-y-1">
                     <div className="inline-flex items-center gap-1 text-xs uppercase font-black tracking-[0.18em] text-slate-400"><Clock className="w-3.5 h-3.5" /> {new Date(ev.date).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })}</div>
@@ -88,17 +89,6 @@ const Card = ({ ev, onOpen }) => (
     </motion.article>
 );
 
-const BentoStat = ({ label, value, hint, icon: Icon }) => (
-        <div className="rounded-2xl border border-white/70 bg-white/72 backdrop-blur-xl flex-none w-[191px] sm:w-[207px] lg:w-[231px] p-3 shadow-sm flex items-start gap-3">
-        {Icon ? <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-50 text-red-600"><Icon className="w-4 h-4" /></div> : null}
-        <div className="flex-1 min-w-0">
-            <div className="text-[9px] uppercase tracking-[0.14em] text-slate-400 font-black truncate">{label}</div>
-            <div className="mt-1 text-base font-black text-slate-900 truncate">{value}</div>
-            <div className="mt-1 text-xs text-slate-600 leading-tight truncate">{hint}</div>
-        </div>
-    </div>
-);
-
 const SectionTitle = ({ eyebrow, title, subtitle }) => (
     <div className="space-y-3 text-center sm:text-left">
         <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 text-[11px] font-black tracking-[0.18em] uppercase text-red-600">
@@ -110,13 +100,43 @@ const SectionTitle = ({ eyebrow, title, subtitle }) => (
     </div>
 );
 
+const HowItWorksCard = ({ step }) => {
+    const Icon = step.icon;
+
+    return (
+        <motion.div whileHover={{ y: -6 }} className="group rounded-[1.75rem] border border-slate-100 bg-linear-to-b from-white to-slate-50 p-5 shadow-sm relative overflow-hidden">
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[radial-gradient(circle_at_top,rgba(239,68,68,0.12),transparent_55%)]" />
+            <div className="relative z-10">
+                <div className="flex items-center justify-between">
+                    <div className="text-xs font-black uppercase tracking-[0.25em] text-red-600">{step.step}</div>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white shadow-sm border border-slate-100 text-slate-500 group-hover:text-red-600 transition-colors">
+                        <Icon className="w-5 h-5" />
+                    </div>
+                </div>
+                <h3 className="mt-4 text-lg font-black text-slate-900">{step.title}</h3>
+                <p className="mt-2 text-sm text-slate-600 leading-relaxed">{step.desc}</p>
+            </div>
+        </motion.div>
+    );
+};
+
 const HomePage = () => {
     const navigate = useNavigate();
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [email, setEmail] = useState('');
     const [subscribed, setSubscribed] = useState(false);
+    const [activeStep, setActiveStep] = useState(0);
+    const [isLoginOpen, setIsLoginOpen] = useState(false);
     const isAuthenticated = !!localStorage.getItem('token');
+
+    useEffect(() => {
+        const stepInterval = setInterval(() => {
+            setActiveStep((currentStep) => (currentStep + 1) % 4);
+        }, 3500);
+
+        return () => clearInterval(stepInterval);
+    }, []);
 
     useEffect(() => {
         const fetchEvents = async () => {
@@ -160,14 +180,14 @@ const HomePage = () => {
     ];
 
     const testimonials = [
-        { name: 'Koffi Mensah', role: 'Organisateur - Festival Cotonou 2023', text: 'EvenFlow a transformé notre événement. Nous avons doublé nos revenus et réduit nos coûts de 40%.', stat: '12,000+ tickets' },
+        { name: 'Koffi Mensah', role: 'Organisateur - Festival Cotonou 2023', text: 'EventChill a transformé notre événement. Nous avons doublé nos revenus et réduit nos coûts de 40%.', stat: '12,000+ tickets' },
         { name: 'Aïcha Diallo', role: 'Productrice - Concert Live Parakou', text: 'La plateforme la plus intuitive que j’ai utilisée. Mes clients adorent la simplicité du processus.', stat: '8,500+ tickets' },
         { name: 'Jean-Baptiste Kouassi', role: 'Manager - Nuit des Étoiles', text: 'Support 24/7 exceptionnel. Chaque question trouve une réponse en moins de 10 minutes.', stat: '15,000+ tickets' },
     ];
 
     return (
         <div className="relative min-h-screen bg-white text-slate-900 overflow-x-hidden">
-            <Nav navigate={navigate} isAuthenticated={isAuthenticated} />
+            <Nav navigate={navigate} isAuthenticated={isAuthenticated} onLogin={() => setIsLoginOpen(true)} />
             <main className="pt-24 sm:pt-26 lg:pt-28">
                 <section className="relative pb-12 sm:pb-16 lg:pb-20">
                     <FloatingBlobs />
@@ -180,7 +200,7 @@ const HomePage = () => {
                                 </span>
                                 <div className="space-y-4">
                                     <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-[3.5rem] font-black leading-[1] tracking-[-0.02em] max-w-3xl mx-auto lg:mx-0">
-                                        Luminous <span className="text-red-500 italic">Echoes</span>
+                                        Lumineux <span className="text-red-500 italic">Waouhhh</span>
                                         <span className="block text-slate-900/95">2026</span>
                                     </h1>
                                     <p className="text-sm sm:text-base text-slate-700/82 max-w-xl xl:max-w-2xl leading-relaxed mx-auto lg:mx-0">
@@ -189,71 +209,56 @@ const HomePage = () => {
                                 </div>
 
                                 <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 pt-2 justify-center lg:justify-start">
-                                    <motion.button whileHover={{ y: -3, scale: 1.015 }} whileTap={{ scale: 0.98 }} className="group px-5 py-3 rounded-2xl bg-linear-to-r from-red-700 via-red-600 to-red-500 text-white font-extrabold shadow-[0_22px_50px_-20px_rgba(220,38,38,0.78)] ring-1 ring-red-500/20 w-full sm:w-auto">
+                                    <motion.button onClick={() => isAuthenticated ? navigate('/explore') : setIsLoginOpen(true)} whileHover={{ y: -3, scale: 1.015 }} whileTap={{ scale: 0.98 }} className="group px-5 py-3 rounded-2xl bg-linear-to-r from-red-700 via-red-600 to-red-500 text-white font-extrabold shadow-[0_22px_50px_-20px_rgba(220,38,38,0.78)] ring-1 ring-red-500/20 w-full sm:w-auto">
                                         <span className="inline-flex items-center gap-2">Réserver mon accès <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" /></span>
                                     </motion.button>
-                                    <motion.button whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }} className="group px-5 py-3 rounded-2xl bg-white/75 border border-slate-200 text-slate-900 shadow-[0_14px_30px_-20px_rgba(15,23,42,0.35)] backdrop-blur-xl w-full sm:w-auto">
+                                    <motion.button onClick={() => document.getElementById('featured-events')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }} className="group px-5 py-3 rounded-2xl bg-white/75 border border-slate-200 text-slate-900 shadow-[0_14px_30px_-20px_rgba(15,23,42,0.35)] backdrop-blur-xl w-full sm:w-auto">
                                         <span className="inline-flex items-center gap-2 font-semibold">Voir le programme <Play className="w-4 h-4 fill-current" /></span>
                                     </motion.button>
                                 </div>
 
                                 <div className="overflow-hidden rounded-[1.75rem] border border-slate-100 bg-white shadow-[0_18px_60px_-36px_rgba(15,23,42,0.28)] max-w-2xl mx-auto lg:mx-0">
-                                    <div className="grid grid-cols-1 sm:grid-cols-[1.1fr_0.9fr] items-stretch">
-                                        <img
-                                            src="https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1200&q=80"
-                                            alt="Evenflow stage preview"
-                                            className="h-36 sm:h-full w-full object-cover"
-                                        />
-                                        <div className="p-4 sm:p-5 flex flex-col justify-between gap-3 bg-linear-to-br from-white via-slate-50 to-white">
-                                            <div>
-                                                <div className="text-[10px] uppercase tracking-[0.2em] text-red-600 font-black">Stage preview</div>
-                                                <h3 className="mt-2 text-lg font-black text-slate-900 leading-tight">Une ambiance qui donne de la profondeur au hero.</h3>
+                                        <div className="grid min-w-0 grid-cols-1 sm:grid-cols-[1.1fr_0.9fr] items-stretch">
+                                            <div className="relative h-36 min-w-0 overflow-hidden sm:h-48">
+                                                <img
+                                                    src="https://imgs.search.brave.com/6gRbU301bQjZOoom0wEerirw0u8E5Tu1v2jFTXA7xfY/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zdGF0/aWNzLWluZm9jb25j/ZXJ0LmRpZ2l0aWNr/LmNvbS9tZWRpYS9h/cnRpc3RlL2FydGlz/dGVfc3VpdGUvaGlt/cmEtY29uY2VydC16/ZW5pdGgtcGFyaXMt/amFudmllcjIwMjYu/anBn"
+                                                    alt="EventChill stage preview"
+                                                    className="absolute inset-0 h-full w-full object-cover object-[center_25%] sm:object-center"
+                                                />
                                             </div>
-                                            <p className="text-sm text-slate-600 leading-relaxed">Une carte visuelle intégrée pour casser la lecture en blocs et renforcer l’effet premium sur desktop.</p>
+                                            <div className="min-w-0 p-4 sm:px-5 sm:pb-5 sm:pt-3 flex flex-col justify-start gap-3 bg-linear-to-br from-white via-slate-50 to-white">
+                                            <div>
+                                                <div className="text-[10px] uppercase tracking-[0.2em] text-red-600 font-black">Aperçu</div>
+                                                <h3 className="mt-2 text-lg font-black text-slate-900 leading-tight">Vous sentez ?</h3>
+                                            </div>
+                                            <p className="text-sm text-slate-600 leading-relaxed">Ça revient, C'est la légèreté de se rappeler qu'il y a autre chose que le travail.</p>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="flex gap-6 pt-2 max-w-7xl mx-auto lg:mx-0 overflow-x-auto lg:overflow-visible justify-between flex-nowrap">
-                                    <BentoStat label="Live" value="Immersif" hint="Son, lumière et scénographie alignés." icon={Star} />
-                                    <BentoStat label="Style" value="Premium" hint="Un rendu inspiré des meilleures startups." icon={Sparkles} />
-                                    <BentoStat label="Focus" value="Red glow" hint="Une identité visuelle intense mais élégante." icon={Zap} />
-                                    <BentoStat label="Flow" value="Instantané" hint="Un parcours de réservation sans friction." icon={ArrowUpRight} />
-                                </div>
                             </div>
 
-                            <div className="relative lg:pl-6 xl:pl-12">
+                            <div className="relative hidden lg:block lg:pl-6 xl:pl-12">
                                 <div className="absolute -inset-6 sm:-inset-8 bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.16),transparent_56%)] blur-3xl" />
                                 <div className="relative rounded-[2rem] overflow-hidden border border-white/70 bg-white shadow-[0_28px_80px_-48px_rgba(15,23,42,0.5)] ring-1 ring-slate-200/60">
                                     <div className="relative h-64 sm:h-72 lg:h-80 xl:h-[22rem] overflow-hidden">
-                                        <img src="https://images.unsplash.com/photo-1514525253361-b83f85df0f5c?auto=format&fit=crop&w=1400&q=80" alt="hero" className="h-full w-full object-cover scale-[1.02]" />
+                                        <img src="https://imgs.search.brave.com/tWA7x0DFDVZbVVDoIglTosiMIT0kHidSab_S-ec6n3k/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly91cy4x/MjNyZi5jb20vNDUw/d20vZHdwaG90b3Mv/ZHdwaG90b3MxNzAx/L2R3cGhvdG9zMTcw/MTAwMDc5LzcwODUx/NzE2LXNpbGhvdWV0/dGVzLWRlLWxhLWZv/dWxlLWRlLWNvbmNl/cnQtZGV2YW50LWxl/cy1sdW1pJUMzJUE4/cmVzLWRlLWxhLXNj/JUMzJUE4bmUtbHVt/aW5ldXNlLmpwZz92/ZXI9Ng" alt="hero" className="h-full w-full object-cover scale-[1.02]" />
                                         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.08),rgba(15,23,42,0.2)_50%,rgba(15,23,42,0.34)_100%)]" />
                                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(255,255,255,0.42),transparent_20%),radial-gradient(circle_at_80%_24%,rgba(255,255,255,0.22),transparent_18%),linear-gradient(135deg,rgba(255,255,255,0.15),transparent_45%,rgba(220,38,38,0.08)_92%)]" />
 
                                         <div className="absolute left-4 top-4 max-w-32 xl:max-w-40 rounded-2xl border border-white/35 bg-white/16 backdrop-blur-2xl px-2.5 py-2 text-white shadow-[0_12px_24px_-12px_rgba(15,23,42,0.8)] animate-[float_11s_ease-in-out_infinite]">
-                                            <div className="text-[10px] uppercase tracking-[0.2em] text-white/70 font-black">On stage</div>
+                                            <div className="text-[10px] uppercase tracking-[0.2em] text-white/70 font-black">Sur Scène</div>
                                             <div className="mt-2 text-sm font-bold leading-tight">Ambiance cinématique, prête pour une grande scène.</div>
                                         </div>
 
                                         <div className="absolute right-4 top-24 max-w-52 xl:max-w-60 rounded-3xl border border-white/35 bg-white/14 backdrop-blur-2xl px-4 py-3 text-white shadow-[0_18px_40px_-22px_rgba(15,23,42,0.9)] animate-[float_13s_ease-in-out_infinite]">
                                             <div className="text-[10px] uppercase tracking-[0.2em] text-white/70 font-black">Capacité</div>
                                             <div className="mt-2 text-sm font-bold leading-tight">12k invités attendus pour cette édition.</div>
-                                        </div>
-
-                                        <div className="absolute left-4 top-24 hidden sm:block w-24 lg:w-28 xl:w-32 rounded-2xl overflow-hidden border border-white/35 bg-white/18 backdrop-blur-2xl shadow-[0_12px_24px_-12px_rgba(15,23,42,0.9)] animate-[float_15s_ease-in-out_infinite]">
-                                            <img
-                                                src="https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=800&q=80"
-                                                alt="Evenflow stage detail"
-                                                className="h-20 lg:h-24 xl:h-28 w-full object-cover"
-                                            />
-                                            <div className="px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-white bg-slate-950/45 backdrop-blur-xl">
-                                                Stage view
-                                            </div>
-                                        </div>
+                                        </div>                                   
 
                                         <div className="absolute left-4 right-4 bottom-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
                                             <div className="rounded-3xl border border-white/35 bg-white/20 backdrop-blur-2xl px-4 py-3 text-white shadow-[0_18px_40px_-22px_rgba(15,23,42,0.9)]">
-                                                <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-white/70 font-black"><Clock className="w-3.5 h-3.5" /> Start 20:00</div>
+                                                <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-white/70 font-black"><Clock className="w-3.5 h-3.5" /> Heure 20:00</div>
                                                 <div className="mt-2 text-sm font-bold">Expérience immersive</div>
                                             </div>
                                             <div className="rounded-3xl border border-white/35 bg-white/20 backdrop-blur-2xl px-4 py-3 text-white shadow-[0_18px_40px_-22px_rgba(15,23,42,0.9)]">
@@ -272,7 +277,7 @@ const HomePage = () => {
                     </div>
                 </section>
 
-                <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+                <section id="featured-events" className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 scroll-mt-28">
                     <div className="grid grid-cols-1 gap-4 lg:gap-6 items-stretch">
                         <div className="rounded-[2rem] border border-slate-100 bg-white/80 backdrop-blur-xl shadow-[0_24px_80px_-56px_rgba(15,23,42,0.35)] p-5 sm:p-6">
                                 <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 border-b border-slate-100 pb-4 mb-6 text-center sm:text-left">
@@ -305,41 +310,22 @@ const HomePage = () => {
                     <div className="rounded-[2rem] border border-slate-100 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,250,252,0.82))] p-6 sm:p-8 shadow-[0_24px_80px_-56px_rgba(15,23,42,0.35)] overflow-hidden relative">
                         <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-red-100/80 blur-3xl" />
                         <div className="relative z-10">
-                            <div className="mb-6 overflow-hidden rounded-[1.75rem] border border-slate-100 bg-white shadow-sm">
-                                <img
-                                    src="https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1400&q=80"
-                                    alt="Evenflow atmosphere"
-                                    className="h-36 w-full object-cover sm:h-44"
-                                />
-                            </div>
                             <SectionTitle
-                                eyebrow="Evenflow atmosphere"
-                                title="Bento rhythm"
+                                eyebrow="EventChill atmosphere"
+                                title="Le rythme"
                                 subtitle="Des blocs qui respirent, sans espaces morts. Une structure plus cinématique avec des volumes alternés, des contrastes légers et une lecture plus dense visuellement."
                             />
                             <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                                 <div className="rounded-3xl border border-slate-100 bg-white p-4 shadow-sm xl:col-span-1">
-                                    <div className="text-[10px] uppercase tracking-[0.22em] text-slate-400 font-black">Curation</div>
+                                    <div className="text-[10px] uppercase tracking-[0.22em] text-slate-400 font-black">Sélection</div>
                                     <div className="mt-2 text-base sm:text-lg font-black text-slate-900 leading-tight max-w-[14ch] sm:max-w-none">Événements sélectionnés</div>
                                     <p className="mt-2 text-sm text-slate-600">Mise en avant claire des expériences les plus fortes.</p>
                                 </div>
-                                <div className="rounded-3xl border border-slate-100 bg-linear-to-br from-slate-950 to-slate-800 p-4 text-white shadow-sm xl:col-span-1">
-                                    <div className="text-[10px] uppercase tracking-[0.22em] text-white/55 font-black">Atmosphere</div>
-                                    <div className="mt-2 text-base sm:text-lg font-black leading-tight max-w-[14ch] sm:max-w-none">Light red glow</div>
-                                    <p className="mt-2 text-sm text-white/70">Des reflets et des ombres plus riches sur toute la page.</p>
+                                <div className="rounded-3xl border border-slate-100 bg-white p-4 text-slate-900 shadow-sm xl:col-span-1">
+                                    <div className="text-[10px] uppercase tracking-[0.22em] text-slate-400 font-black">Atmosphere</div>
+                                    <div className="mt-2 text-base sm:text-lg font-black leading-tight max-w-[14ch] sm:max-w-none">Lueur rouge pâle</div>
+                                    <p className="mt-2 text-sm text-slate-600">Des reflets et des ombres plus riches sur toute la page.</p>
                                 </div>
-                                <div className="rounded-3xl border border-slate-100 bg-white p-4 shadow-sm xl:col-span-1">
-                                    <div className="text-[10px] uppercase tracking-[0.22em] text-slate-400 font-black">Motion</div>
-                                    <div className="mt-2 text-base sm:text-lg font-black text-slate-900 leading-tight max-w-[14ch] sm:max-w-none">Scroll reveal</div>
-                                </div>
-                                <div className="rounded-3xl border border-slate-100 bg-white p-4 shadow-sm xl:col-span-3 xl:flex xl:items-center xl:justify-between xl:gap-8">
-                                    <div>
-                                        <div className="text-[10px] uppercase tracking-[0.22em] text-slate-400 font-black">Depth</div>
-                                        <div className="mt-2 text-base sm:text-lg font-black text-slate-900 leading-tight max-w-[14ch] sm:max-w-none">Layered cards</div>
-                                    </div>
-                                    <p className="mt-2 xl:mt-0 text-sm text-slate-600 leading-relaxed max-w-md">Sur desktop, cette dernière boîte s'étire pour créer une vraie respiration visuelle et une structure plus premium.</p>
-                                </div>
-
                             </div>
                         </div>
                     </div>
@@ -349,35 +335,26 @@ const HomePage = () => {
                     <div className="mb-6 sm:mb-8 flex items-end justify-between gap-4 border-b border-slate-100 pb-4">
                         <div>
                             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/5 text-[11px] font-extrabold tracking-[0.18em] uppercase text-slate-700"><ArrowUpRight className="w-3.5 h-3.5" /> Comment ça marche</span>
-                            <h2 className="mt-3 text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-slate-900">Simple, rapide, sans friction.</h2>
+                            <h2 className="mt-3 text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-slate-900">Simple, rapide, sans friction</h2>
                         </div>
                     </div>
-                    <div className="mb-6 overflow-hidden rounded-[2rem] border border-slate-100 bg-white shadow-[0_24px_80px_-56px_rgba(15,23,42,0.35)]">
+                    <div className="mb-6 hidden overflow-hidden rounded-[2rem] border border-slate-100 bg-white shadow-[0_24px_80px_-56px_rgba(15,23,42,0.35)] sm:block">
                         <img
                             src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1600&q=80"
-                            alt="Evenflow event flow"
+                            alt="EventChill event flow"
                             className="h-56 w-full object-cover sm:h-72"
                         />
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {howItWorks.map((step) => {
-                            const Icon = step.icon;
-                            return (
-                                <motion.div key={step.step} whileHover={{ y: -6 }} className="group rounded-[1.75rem] border border-slate-100 bg-linear-to-b from-white to-slate-50 p-5 shadow-sm relative overflow-hidden">
-                                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[radial-gradient(circle_at_top,rgba(239,68,68,0.12),transparent_55%)]" />
-                                    <div className="relative z-10">
-                                        <div className="flex items-center justify-between">
-                                            <div className="text-xs font-black uppercase tracking-[0.25em] text-red-600">{step.step}</div>
-                                            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white shadow-sm border border-slate-100 text-slate-500 group-hover:text-red-600 transition-colors">
-                                                <Icon className="w-5 h-5" />
-                                            </div>
-                                        </div>
-                                        <h3 className="mt-4 text-lg font-black text-slate-900">{step.title}</h3>
-                                        <p className="mt-2 text-sm text-slate-600 leading-relaxed">{step.desc}</p>
-                                    </div>
-                                </motion.div>
-                            );
-                        })}
+                    <div className="sm:hidden">
+                        <HowItWorksCard key={howItWorks[activeStep].step} step={howItWorks[activeStep]} />
+                        <div className="mt-4 flex justify-center gap-2" aria-label="Progression des étapes">
+                            {howItWorks.map((step, index) => (
+                                <span key={step.step} className={`h-1.5 rounded-full transition-all duration-500 ${index === activeStep ? 'w-7 bg-red-500' : 'w-1.5 bg-slate-200'}`} />
+                            ))}
+                        </div>
+                    </div>
+                    <div className="hidden grid-cols-1 gap-4 sm:grid sm:grid-cols-2 lg:grid-cols-4">
+                        {howItWorks.map((step) => <HowItWorksCard key={step.step} step={step} />)}
                     </div>
                 </section>
 
@@ -385,20 +362,20 @@ const HomePage = () => {
                     <div className="mb-6 sm:mb-8 flex items-end justify-between gap-4 border-b border-slate-100 pb-4">
                         <div>
                             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 text-[11px] font-extrabold tracking-[0.18em] uppercase text-red-600"><Star className="w-3.5 h-3.5 fill-current" /> Témoignages</span>
-                            <h2 className="mt-3 text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-slate-900">Ce que les organisateurs disent.</h2>
+                            <h2 className="mt-3 text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-slate-900">Ce que les organisateurs disent</h2>
                         </div>
                     </div>
                     <div className="overflow-hidden">
                         <div className="flex w-max gap-4 pb-2 md:pb-3 animate-[marquee_36s_linear_infinite] hover:[animation-play-state:paused]">
                             {[...testimonials, ...testimonials].map((item, index) => (
-                                <motion.div key={`${item.name}-${index}`} whileHover={{ y: -6 }} className={`w-48 sm:w-56 lg:w-64 h-48 sm:h-56 lg:h-64 rounded-2xl border p-4 shadow-sm relative overflow-hidden shrink-0 ${index % testimonials.length === 1 ? 'bg-linear-to-b from-white via-white to-slate-50 border-slate-100' : 'bg-white border-slate-100'}`}>
+                                <motion.div key={`${item.name}-${index}`} whileHover={{ y: -6 }} className={`w-48 sm:w-56 lg:w-80 h-48 sm:h-56 lg:h-64 rounded-2xl lg:rounded-3xl border p-4 lg:p-5 shadow-sm relative overflow-hidden shrink-0 ${index % testimonials.length === 1 ? 'bg-linear-to-b from-white via-white to-slate-50 border-slate-100' : 'bg-white border-slate-100'}`}>
                                     <div className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity duration-500 bg-[radial-gradient(circle_at_top,rgba(239,68,68,0.1),transparent_45%)]" />
                                     <div className="relative z-10">
-                                        <div className="flex items-center gap-1 text-red-500 text-sm mb-3">★★★★★</div>
-                                        <p className="text-xs text-slate-700 leading-tight mb-2 max-h-[3.75rem] overflow-hidden">&quot;{item.text}&quot;</p>
-                                        <div className="border-t border-slate-100 pt-3">
+                                        <div className="flex items-center gap-1 text-red-500 text-sm mb-3 lg:mb-5">★★★★★</div>
+                                        <p className="text-xs lg:text-sm text-slate-700 leading-relaxed mb-2 max-h-[3.75rem] lg:max-h-[5.5rem] overflow-hidden">&quot;{item.text}&quot;</p>
+                                        <div className="border-t border-slate-100 pt-3 lg:pt-4">
                                             <h3 className="font-extrabold text-xs text-slate-900 truncate">{item.name}</h3>
-                                            <p className="text-[11px] text-slate-500 truncate">{item.role}</p>
+                                            <p className="text-[11px] text-slate-500 truncate lg:whitespace-normal lg:line-clamp-2">{item.role}</p>
                                             <p className="mt-1 text-[11px] font-black uppercase tracking-[0.18em] text-red-600 truncate">{item.stat}</p>
                                         </div>
                                     </div>
@@ -410,7 +387,7 @@ const HomePage = () => {
 
                 <section className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
                     <div className="grid grid-cols-1 lg:grid-cols-[0.95fr_1.05fr] gap-4 lg:gap-6 items-stretch">
-                        <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-linear-to-br from-white via-slate-50 to-white p-4 sm:p-5 shadow-[0_24px_80px_-56px_rgba(15,23,42,0.45)]">
+                        <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-linear-to-br from-white via-slate-50 to-white p-4 sm:p-5 shadow-[0_24px_80px_-56px_rgba(15,23,42,0.45)] lg:col-span-2">
                             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(220,38,38,0.09),transparent_42%)] pointer-events-none" />
                             <div className="relative z-10 space-y-4">
                                 <div className="inline-flex items-center gap-2 rounded-full bg-black/5 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-slate-700">
@@ -436,6 +413,8 @@ const HomePage = () => {
             </main>
 
             <Footer />
+
+            {isLoginOpen && <Auth embedded onClose={() => setIsLoginOpen(false)} />}
         </div>
     );
 };
